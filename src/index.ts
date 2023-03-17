@@ -1,5 +1,5 @@
 import { ColorNames, HEX, HSL, NamedColor, RGB } from "./types";
-import { safeAlpha, safeHue, safePct, safeRgb } from "./utils";
+import { random, safeAlpha, safeHue, safePct, safeRgb } from "./utils";
 
 export class Color {
 	private rgba: RGB = { r: 0, g: 0, b: 0, a: 1 };
@@ -356,6 +356,79 @@ export class Color {
 		const ratio: number = this.contrast(c);
 
 		return ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : "";
+	}
+
+	public complementary(): Color[] {
+		const c1: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(180);
+
+		return [this, c1];
+	}
+
+	public analogous(): Color[] {
+		const a1: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(30);
+		const a2: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(60);
+
+		return [this, a1, a2];
+	}
+
+	public triadic(): Color[] {
+		const a1: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(120);
+		const a2: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(240);
+
+		return [this, a1, a2];
+	}
+
+	public splitComplementary(): Color[] {
+		const a1: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(150);
+		const a2: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(210);
+
+		return [this, a1, a2];
+	}
+
+	public doubleComplementary(hue: number): Color[] {
+		// 90 degrees complementary of current color
+		const a1: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(90);
+
+		// Color calculated from hue
+		const a2: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(hue);
+
+		// 90 degrees complementary of new color
+		const a3: Color = new Color().hsl(a2.hsla.h, a2.hsla.s, a2.hsla.l, a2.hsla.a).rotate(90);
+
+		return [this, a1, a2, a3];
+	}
+
+	public swatch(band: 3 | 5 | 7 | 9 = 5): Color[] {
+		const h: number = this.hsla.h, s: number = this.hsla.s, l: number = this.hsla.l, a: number = this.hsla.a as number;
+
+		const colors: Color[] = [this];
+
+		for (let i: number = 1; i < band; i++) {
+			if (i % 2 === 0) {
+				colors.push(new Color().hsl(h, s, l, a).rotate(10 * i).desaturate(5 * i).darken(2.5 * i));
+			} else {
+				colors.unshift(new Color().hsl(h, s, l, a).rotate(-10 * i).saturate(5 * i).lighten(2.5 * i));
+			}
+		}
+
+		return colors;
+	}
+
+	public randomSwatch(band: 3 | 5 | 7 | 9 = 5): Color[] {
+		const h: number = this.hsla.h, s: number = this.hsla.s, l: number = this.hsla.l, a: number = this.hsla.a as number;
+
+		const colors: Color[] = [this];
+
+		for (let i: number = 1; i < band; i++) {
+			console.log(random())
+			if (i % 2 === 0) {
+				colors.push(new Color().hsl(h, s, l, a).rotate(random() * i * 10).desaturate(random() * i * 5).darken(random() * i * 5));
+			} else {
+				colors.unshift(new Color().hsl(h, s, l, a).rotate(random() * i * 10).saturate(random() * i * 5).lighten(random() * i * 5));
+			}
+		}
+
+		return colors;
 	}
 
 	public colors(): object {
