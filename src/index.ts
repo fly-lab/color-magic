@@ -158,25 +158,25 @@ export class Color {
 	};
 
 	public rgb(r: number, g: number, b: number, a?: number): Color {
-		this.#fromRgb({r, g, b, a});
-		this.#rgbToHsl();
-		this.#rgbToHex();
+		this.fromRgb({ r, g, b, a });
+		this.rgbToHsl();
+		this.rgbToHex();
 
 		return this;
 	}
 
 	public hsl(h: number, s: number, l: number, a?: number): Color {
-		this.#fromHsl({h, s, l, a});
-		this.#hslToHex();
-		this.#hslToRgb();
+		this.fromHsl({ h, s, l, a });
+		this.hslToHex();
+		this.hslToRgb();
 
 		return this;
 	}
 
 	public hex(hex: string): Color {
-		this.#fromHex(hex);
-		this.#hexToHsl();
-		this.#hexToRgb();
+		this.fromHex(hex);
+		this.hexToHsl();
+		this.hexToRgb();
 
 		return this;
 	}
@@ -294,9 +294,9 @@ export class Color {
 	public blend(c: Color, percentage: number = 50): Color {
 		percentage = safePct(percentage) / 100;
 
-		const r: number = this.#colorChannelMixer(this.rgba.r, c.rgba.r, percentage);
-		const g: number = this.#colorChannelMixer(this.rgba.g, c.rgba.g, percentage);
-		const b: number = this.#colorChannelMixer(this.rgba.b, c.rgba.b, percentage);
+		const r: number = this.colorChannelMixer(this.rgba.r, c.rgba.r, percentage);
+		const g: number = this.colorChannelMixer(this.rgba.g, c.rgba.g, percentage);
+		const b: number = this.colorChannelMixer(this.rgba.b, c.rgba.b, percentage);
 
 		this.rgb(r, g, b);
 
@@ -315,10 +315,53 @@ export class Color {
 		return this;
 	}
 
+	public negate(): Color {
+		const r: number = 255 - this.rgba.r;
+		const g: number = 255 - this.rgba.g;
+		const b: number = 255 - this.rgba.b;
+
+		this.rgb(r, g, b);
+
+		return this;
+	}
+
+	public isDark(): boolean {
+		return ((this.rgba.r * 2126 + this.rgba.g * 7152 + this.rgba.b * 722) / 10000) < 128;
+	}
+
+	public isLight(): boolean {
+		return !this.isDark();
+	}
+
+	public luminance(): number {
+		const rx: number = this.rgba.r / 100;
+		const gx: number = this.rgba.g / 100;
+		const bx: number = this.rgba.b / 100;
+		const r: number = rx <= 0.03928 ? rx / 12.92 : ((rx + 0.055) / 1.055) ** 2.4;
+		const g: number = gx <= 0.03928 ? gx / 12.92 : ((gx + 0.055) / 1.055) ** 2.4;
+		const b: number = bx <= 0.03928 ? bx / 12.92 : ((bx + 0.055) / 1.055) ** 2.4;
+
+		return Number((0.2126 * r + 0.7152 * g + 0.0722 * b).toFixed(4));
+	}
+
+	public contrast(c: Color): number {
+		const l1: number = this.luminance();
+		const l2: number = c.luminance();
+		const div: number = (l1 + 0.05) / (l2 + 0.05);
+
+		return l1 > l2 ? div : 1 / div;
+	}
+
+	public level(c: Color): string {
+		const ratio: number = this.contrast(c);
+
+		return ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : "";
+	}
+
 	public colors(): object {
 		return {
 			rgb: this.rgba, hsl: this.hsla, hex: this.hexa,
-		}
+		};
 	}
 
 	public toRgbObj(): object {
@@ -367,13 +410,13 @@ export class Color {
 		if (withAlpha) return `hsla(${h}, ${s}%, ${l}%, ${a})`; else return `hsl(${h}, ${s}%, ${l}%)`;
 	}
 
-	#colorChannelMixer(colorChannelA: number, colorChannelB: number, percentage: number): number {
+	private colorChannelMixer(colorChannelA: number, colorChannelB: number, percentage: number): number {
 		const channelA: number = colorChannelA * percentage;
 		const channelB: number = colorChannelB * (1 - percentage);
 		return channelA + channelB;
 	}
 
-	#fromRgb(rgb: RGB): Color {
+	private fromRgb(rgb: RGB): Color {
 		this.rgba = {
 			r: safeRgb(rgb.r),
 			g: safeRgb(rgb.g),
@@ -384,7 +427,7 @@ export class Color {
 		return this;
 	}
 
-	#fromHsl(hsl: HSL): Color {
+	private fromHsl(hsl: HSL): Color {
 		this.hsla = {
 			h: safeHue(hsl.h),
 			s: safePct(hsl.s),
@@ -395,26 +438,26 @@ export class Color {
 		return this;
 	}
 
-	#fromHex(hex: string): Color {
+	private fromHex(hex: string): Color {
 		const len: number = hex.length;
 		let x: string = "00", y: string = "00", z: string = "00", a: string = "ff";
 
 		if (len === 3 || len === 4) {
-			const result: string[] = /^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
+			const result: RegExpExecArray | null = /^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
 			if (result) {
 				x = result[1] + result[1];
 				y = result[2] + result[2];
 				z = result[3] + result[3];
 			}
 		} else if (len === 6 || len === 7) {
-			const result: string[] = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+			const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 			if (result) {
 				x = result[1];
 				y = result[2];
 				z = result[3];
 			}
 		} else if (len === 8 || len === 9) {
-			const result: string[] = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+			const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 			if (result) {
 				x = result[1];
 				y = result[2];
@@ -428,7 +471,7 @@ export class Color {
 		return this;
 	}
 
-	#rgbToHex(): Color {
+	private rgbToHex(): Color {
 		const x: string = this.rgba.r.toString(16).padStart(2, "0");
 		const y: string = this.rgba.g.toString(16).padStart(2, "0");
 		const z: string = this.rgba.b.toString(16).padStart(2, "0");
@@ -439,7 +482,7 @@ export class Color {
 		return this;
 	}
 
-	#hexToRgb(): Color {
+	private hexToRgb(): Color {
 		const r: number = Number("0x" + this.hexa.x);
 		const g: number = Number("0x" + this.hexa.y);
 		const b: number = Number("0x" + this.hexa.z);
@@ -451,7 +494,7 @@ export class Color {
 		return this;
 	}
 
-	#rgbToHsl(): Color {
+	private rgbToHsl(): Color {
 		const r: number = this.rgba.r / 255;
 		const g: number = this.rgba.g / 255;
 		const b: number = this.rgba.b / 255;
@@ -484,7 +527,7 @@ export class Color {
 		return this;
 	}
 
-	#hslToRgb(): Color {
+	private hslToRgb(): Color {
 		const h: number = this.hsla.h;
 		const s: number = this.hsla.s / 100;
 		const l: number = this.hsla.l / 100;
@@ -529,16 +572,16 @@ export class Color {
 		return this;
 	}
 
-	#hslToHex(): Color {
-		this.#hslToRgb();
-		this.#rgbToHex();
+	private hslToHex(): Color {
+		this.hslToRgb();
+		this.rgbToHex();
 
 		return this;
 	}
 
-	#hexToHsl(): Color {
-		this.#hexToRgb();
-		this.#rgbToHsl();
+	private hexToHsl(): Color {
+		this.hexToRgb();
+		this.rgbToHsl();
 
 		return this;
 	}
