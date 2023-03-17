@@ -1,8 +1,8 @@
 {
   "branch": "master",
   "contents": "dist",
-  "yarn": false,
+  "yarn": true,
   "message": "chore: :bookmark: Publish v%s tag",
-  "publish": false,
+  "publish": true,
   "tests": false
 }
