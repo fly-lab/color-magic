@@ -321,6 +321,18 @@ export class Color {
 		}
 	}
 
+	public toRgbObj(): object {
+		return this.rgba;
+	}
+
+	public toHslObj(): object {
+		return this.hsla;
+	}
+
+	public toHexObj(): object {
+		return this.hexa;
+	}
+
 	public to(): string {
 		return this.toRgb();
 	}
