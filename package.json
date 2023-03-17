@@ -45,6 +45,7 @@
 		"publish:np": "np --branch=master --message=\"chore: :bookmark: Publish v%s tag\"",
 		"publish:np:false": "np --branch=master --message=\"chore: :bookmark: Publish v%s tag\" --publish=false",
 		"np": "np",
+		"publish:npm": "npm publish --access public",
 		"check:yarn": "if command -v check-npm-yarn > /dev/null; then check-npm-yarn; fi"
 	},
 	"module": "dist/color-magic.esm.js",
