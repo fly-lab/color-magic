@@ -1,0 +1,82 @@
+{
+	"version": "0.8.2",
+	"name": "@grid-momenta/template-ts-lib",
+	"author": "DHN Chandan",
+	"license": "MIT",
+	"main": "dist/index.js",
+	"typings": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"engines": {
+		"node": ">=18"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/grid-momenta/template-ts-lib.git"
+	},
+	"homepage": "https://github.com/grid-momenta/template-ts-lib.git",
+	"keywords": [
+		"tsdx",
+		"npm package",
+		"typescript"
+	],
+	"scripts": {
+		"start": "tsdx watch",
+		"build": "tsdx build",
+		"test": "tsdx test",
+		"lint": "tsdx lint",
+		"prettier": "prettier --list-different .",
+		"prettier:check": "prettier --check .",
+		"prettier:fix": "prettier --write .",
+		"prepare": "tsdx build",
+		"size": "size-limit",
+		"analyze": "size-limit --why",
+		"cz": "git cz",
+		"cz:install": "commitizen init cz-conventional-changelog --yarn --dev --exact",
+		"cz:force": "commitizen init cz-conventional-changelog --yarn --dev --exact --force",
+		"semantic-release": "semantic-release --branches publish",
+		"publish:np": "np --branch=master --message=\"chore: :bookmark: Publish v%s tag\"",
+		"publish:np:false": "np --branch=master --message=\"chore: :bookmark: Publish v%s tag\" --publish=false",
+		"np": "np",
+		"check:yarn": "if command -v check-npm-yarn > /dev/null; then check-npm-yarn; fi"
+	},
+	"module": "dist/template-ts-lib.esm.js",
+	"size-limit": [
+		{
+			"path": "dist/template-ts-lib.cjs.production.min.js",
+			"limit": "10 KB"
+		},
+		{
+			"path": "dist/template-ts-lib.esm.js",
+			"limit": "10 KB"
+		}
+	],
+	"devDependencies": {
+		"@rushstack/eslint-config": "^3.2.0",
+		"@size-limit/preset-small-lib": "^8.2.4",
+		"@types/lodash": "^4.14.191",
+		"@types/node": "^18.15.3",
+		"commitizen": "^4.3.0",
+		"cz-conventional-changelog": "^3.3.0",
+		"eslint": "^8.36.0",
+		"husky": "^8.0.3",
+		"semantic-release": "^20.1.1",
+		"size-limit": "^8.2.4",
+		"tsdx": "^0.14.1",
+		"tslib": "^2.5.0",
+		"typescript": "^5.0.2"
+	},
+	"dependencies": {
+		"lodash": "^4.17.21",
+		"lodash-es": "^4.17.21"
+	},
+	"config": {
+		"commitizen": {
+			"path": "./node_modules/cz-conventional-changelog"
+		}
+	}
+}

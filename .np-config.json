@@ -1,0 +1,8 @@
+{
+  "branch": "master",
+  "contents": "dist",
+  "yarn": false,
+  "message": "chore: :bookmark: Publish v%s tag",
+  "publish": false,
+  "tests": false
+}

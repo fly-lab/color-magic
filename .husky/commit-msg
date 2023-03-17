@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+if ! head -1 "$1" | grep -qE "^(feat|fix|chore|docs|test|style|refactor|perf|build|ci|revert)(\(.+?\))?: .{1,}$"; then
+    echo "Aborting commit. Your commit message is invalid. Use 'yarn cz' command." >&2
+    exit 1
+fi
+
+if ! head -1 "$1" | grep -qE "^.{1,93}$"; then
+    echo "Aborting commit. Your commit message is too long." >&2
+    exit 1
+fi
