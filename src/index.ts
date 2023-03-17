@@ -1,4 +1,4 @@
-import { ColorNames, HEX, HSL, RGB } from "./types";
+import { ColorNames, HEX, HSL, NamedColor, RGB } from "./types";
 import { safeAlpha, safeHue, safePct, safeRgb } from "./utils";
 
 export class Color {
@@ -156,6 +156,86 @@ export class Color {
 		"yellow": "#ffff00",
 		"yellowgreen": "#9acd32",
 	};
+
+	public rgb(r: number, g: number, b: number, a?: number): Color {
+		this.#fromRgb({r, g, b, a});
+		this.#rgbToHsl();
+		this.#rgbToHex();
+
+		return this;
+	}
+
+	public hsl(h: number, s: number, l: number, a?: number): Color {
+		this.#fromHsl({h, s, l, a});
+		this.#hslToHex();
+		this.#hslToRgb();
+
+		return this;
+	}
+
+	public hex(hex: string): Color {
+		this.#fromHex(hex);
+		this.#hexToHsl();
+		this.#hexToRgb();
+
+		return this;
+	}
+
+	public name(name: NamedColor): Color {
+		const hex: string = this.colorNames[name];
+		this.hex(hex);
+
+		return this;
+	}
+
+	public red(r: number): Color {
+		this.rgb(r, this.rgba.g, this.rgba.b, this.rgba.a);
+
+		return this;
+	}
+
+	public green(g: number): Color {
+		this.rgb(this.rgba.r, g, this.rgba.b, this.rgba.a);
+
+		return this;
+	}
+
+	public blue(b: number): Color {
+		this.rgb(this.rgba.r, this.rgba.g, b, this.rgba.a);
+
+		return this;
+	}
+
+	public hue(h: number): Color {
+		this.hsl(h, this.hsla.s, this.hsla.l, this.hsla.a);
+
+		return this;
+	}
+
+	public saturation(s: number): Color {
+		this.hsl(this.hsla.h, s, this.hsla.l, this.hsla.a);
+
+		return this;
+	}
+
+	public lightness(l: number): Color {
+		this.hsl(this.hsla.h, this.hsla.s, l, this.hsla.a);
+
+		return this;
+	}
+
+	public alpha(value: number): Color {
+		const v: number = safePct(value) / 100;
+		this.hsl(this.hsla.h, this.hsla.s, this.hsla.l, Number(v.toFixed(2)));
+
+		return this;
+	}
+
+	public colors(): object {
+		return {
+			rgb: this.rgba, hsl: this.hsla, hex: this.hexa,
+		}
+	}
 
 	public to(): string {
 		return this.toRgb();
