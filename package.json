@@ -6,7 +6,10 @@
 	"main": "dist/index.js",
 	"typings": "dist/index.d.ts",
 	"files": [
-		"dist"
+		"dist",
+		"package.json",
+		"tsconfig.json",
+		".gitignore"
 	],
 	"engines": {
 		"node": ">=18"
