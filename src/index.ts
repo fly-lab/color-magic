@@ -231,6 +231,90 @@ export class Color {
 		return this;
 	}
 
+	public transparent(): Color {
+		this.rgb(0, 0, 0, 0);
+
+		return this;
+	}
+
+	public lighten(value: number): Color {
+		const l: number = this.hsla.l * (1 + (safePct(value) / 100));
+		this.lightness(Number(l.toFixed(1)));
+
+		return this;
+	}
+
+	public darken(value: number): Color {
+		const l: number = this.hsla.l * (1 - (safePct(value) / 100));
+		this.lightness(Number(l.toFixed(1)));
+
+		return this;
+	}
+
+	public saturate(value: number): Color {
+		const s: number = this.hsla.s * (1 + (safePct(value) / 100));
+		this.saturation(Number(s.toFixed(1)));
+
+		return this;
+	}
+
+	public desaturate(value: number): Color {
+		const s: number = this.hsla.s * (1 + (safePct(value) / 100));
+		this.saturation(Number(s.toFixed(1)));
+
+		return this;
+	}
+
+	public rotate(value: number): Color {
+		const rem: number = value % 360;
+		let h: number = this.hsla.h + rem;
+
+		if (h > 360) h -= 360;
+		if (h < 0) h += 360;
+
+		this.hue(h);
+
+		return this;
+	}
+
+	public fade(value: number): Color {
+		const v: number = this.hsla.a! * (1 - (safePct(value) / 100));
+		this.hsl(this.hsla.h, this.hsla.s, this.hsla.l, v);
+
+		return this;
+	}
+
+	public brighten(value: number): Color {
+		const v: number = this.hsla.a! * (1 + (safePct(value) / 100));
+		this.hsl(this.hsla.h, this.hsla.s, this.hsla.l, Number(v.toFixed(2)));
+
+		return this;
+	}
+
+	public blend(c: Color, percentage: number = 50): Color {
+		percentage = safePct(percentage) / 100;
+
+		const r: number = this.#colorChannelMixer(this.rgba.r, c.rgba.r, percentage);
+		const g: number = this.#colorChannelMixer(this.rgba.g, c.rgba.g, percentage);
+		const b: number = this.#colorChannelMixer(this.rgba.b, c.rgba.b, percentage);
+
+		this.rgb(r, g, b);
+
+		return this;
+	}
+
+	public grayscale(algorithm: "luminosity" | "averaged" = "luminosity"): Color {
+		if (algorithm === "luminosity") {
+			const value: number = this.rgba.r * 0.3 + this.rgba.g * 0.59 + this.rgba.b * 0.11;
+			this.rgb(value, value, value);
+		} else if (algorithm === "averaged") {
+			const value: number = (this.rgba.r + this.rgba.g + this.rgba.b) / 3;
+			this.rgb(value, value, value);
+		}
+
+		return this;
+	}
+
 	public colors(): object {
 		return {
 			rgb: this.rgba, hsl: this.hsla, hex: this.hexa,
