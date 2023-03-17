@@ -73,10 +73,6 @@
 		"tslib": "^2.5.0",
 		"typescript": "^5.0.2"
 	},
-	"dependencies": {
-		"lodash": "^4.17.21",
-		"lodash-es": "^4.17.21"
-	},
 	"config": {
 		"commitizen": {
 			"path": "./node_modules/cz-conventional-changelog"
