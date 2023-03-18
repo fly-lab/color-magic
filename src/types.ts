@@ -172,6 +172,8 @@ export type NamedColor =
 
 export type ColorNames = Record<NamedColor, string>
 
+export type ColorMethod = "hsl" | "rgb" | "hex" | undefined;
+
 export type ValidationResult = [boolean, {
-	method: "hsl" | "rgb" | "hex" | undefined; alpha?: boolean;
+	method: ColorMethod; alpha?: boolean;
 }]

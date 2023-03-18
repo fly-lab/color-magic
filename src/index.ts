@@ -1,4 +1,4 @@
-import { ColorNames, HEX, HSL, NamedColor, RGB, ValidationResult } from "./types";
+import { ColorMethod, ColorNames, HEX, HSL, NamedColor, RGB, ValidationResult } from "./types";
 import { random, safeAlpha, safeHue, safePct, safeRgb } from "./utils";
 
 export class Color {
@@ -415,7 +415,8 @@ export class Color {
 	}
 
 	public swatch(band: 3 | 5 | 7 | 9 = 5): Color[] {
-		const h: number = this.hsla.h, s: number = this.hsla.s, l: number = this.hsla.l, a: number = this.hsla.a as number;
+		const h: number = this.hsla.h, s: number = this.hsla.s, l: number = this.hsla.l,
+			a: number = this.hsla.a as number;
 
 		const colors: Color[] = [this];
 
@@ -431,7 +432,8 @@ export class Color {
 	}
 
 	public randomSwatch(band: 3 | 5 | 7 | 9 = 5): Color[] {
-		const h: number = this.hsla.h, s: number = this.hsla.s, l: number = this.hsla.l, a: number = this.hsla.a as number;
+		const h: number = this.hsla.h, s: number = this.hsla.s, l: number = this.hsla.l,
+			a: number = this.hsla.a as number;
 
 		const colors: Color[] = [this];
 
@@ -499,54 +501,54 @@ export class Color {
 	}
 
 	public validate(c: string): ValidationResult {
-		const hex = this.validateHex(c);
+		const hex: ValidationResult = this.validateHex(c);
 		if (hex[0]) return hex;
 
-		const hsl = this.validateHsl(c);
+		const hsl: ValidationResult = this.validateHsl(c);
 		if (hsl[0]) return hsl;
 
 		return this.validateRgb(c);
 	}
 
 	public validateRgb(c: string): ValidationResult {
-		const exp : RegExp = /^rgb\((((((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]),\s?)){2}|((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5])\s)){2})((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]))|((((([1-9]?\d(\.\d+)?)|100|(\.\d+))%,\s?){2}|((([1-9]?\d(\.\d+)?)|100|(\.\d+))%\s){2})(([1-9]?\d(\.\d+)?)|100|(\.\d+))%))\)$/i;
-		const expAlpha : RegExp = /^rgba\((((((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]),\s?)){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%,\s?){3}))|(((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5])\s){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%\s){3}))\/\s)((0?\.\d+)|[01]|(([1-9]?\d(\.\d+)?)|100|(\.\d+))%)\)$/i;
-		const method = "rgb";
+		const exp: RegExp = /^rgb\((((((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]),\s?)){2}|((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5])\s)){2})((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]))|((((([1-9]?\d(\.\d+)?)|100|(\.\d+))%,\s?){2}|((([1-9]?\d(\.\d+)?)|100|(\.\d+))%\s){2})(([1-9]?\d(\.\d+)?)|100|(\.\d+))%))\)$/i;
+		const expAlpha: RegExp = /^rgba\((((((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]),\s?)){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%,\s?){3}))|(((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5])\s){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%\s){3}))\/\s)((0?\.\d+)|[01]|(([1-9]?\d(\.\d+)?)|100|(\.\d+))%)\)$/i;
+		const method: ColorMethod = "rgb";
 
 		if (exp.test(c)) {
-			return [true, {method, alpha: false}];
+			return [true, { method, alpha: false }];
 		} else if (expAlpha.test(c)) {
-			return [true, {method, alpha: true}];
+			return [true, { method, alpha: true }];
 		} else {
-			return [false, {method: undefined}];
+			return [false, { method: undefined }];
 		}
 	}
 
 	public validateHsl(c: string): ValidationResult {
-		const exp : RegExp = /^hsl\(((((([12]?[1-9]?\d)|[12]0\d|(3[0-5]\d))(\.\d+)?)|(\.\d+))(deg)?|(0|0?\.\d+)turn|(([0-6](\.\d+)?)|(\.\d+))rad|360)((,\s?(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2}|(\s(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2})\)$/i;
-		const expAlpha : RegExp = /^hsla\(((((([12]?[1-9]?\d)|[12]0\d|(3[0-5]\d))(\.\d+)?)|(\.\d+))(deg)?|(0|0?\.\d+)turn|(([0-6](\.\d+)?)|(\.\d+))rad|360)(((,\s?(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2},\s?)|((\s(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2}\s\/\s))((0?\.\d+)|[01]|(([1-9]?\d(\.\d+)?)|100|(\.\d+))%)\)$/i;
-		const method = "hsl";
+		const exp: RegExp = /^hsl\(((((([12]?[1-9]?\d)|[12]0\d|(3[0-5]\d))(\.\d+)?)|(\.\d+))(deg)?|(0|0?\.\d+)turn|(([0-6](\.\d+)?)|(\.\d+))rad|360)((,\s?(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2}|(\s(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2})\)$/i;
+		const expAlpha: RegExp = /^hsla\(((((([12]?[1-9]?\d)|[12]0\d|(3[0-5]\d))(\.\d+)?)|(\.\d+))(deg)?|(0|0?\.\d+)turn|(([0-6](\.\d+)?)|(\.\d+))rad|360)(((,\s?(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2},\s?)|((\s(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2}\s\/\s))((0?\.\d+)|[01]|(([1-9]?\d(\.\d+)?)|100|(\.\d+))%)\)$/i;
+		const method: ColorMethod = "hsl";
 
 		if (exp.test(c)) {
-			return [true, {method, alpha: false}];
+			return [true, { method, alpha: false }];
 		} else if (expAlpha.test(c)) {
-			return [true, {method, alpha: true}];
+			return [true, { method, alpha: true }];
 		} else {
-			return [false, {method: undefined}];
+			return [false, { method: undefined }];
 		}
 	}
 
 	public validateHex(c: string): ValidationResult {
-		const exp : RegExp = /^#?([\da-f]{3}){1,2}$/i;
-		const expAlpha : RegExp = /^#?([\da-f]{4}){1,2}$/i;
-		const method = "hex";
+		const exp: RegExp = /^#?([\da-f]{3}){1,2}$/i;
+		const expAlpha: RegExp = /^#?([\da-f]{4}){1,2}$/i;
+		const method: ColorMethod = "hex";
 
 		if (exp.test(c)) {
-			return [true, {method, alpha: false}];
+			return [true, { method, alpha: false }];
 		} else if (expAlpha.test(c)) {
-			return [true, {method, alpha: true}];
+			return [true, { method, alpha: true }];
 		} else {
-			return [false, {method: undefined}];
+			return [false, { method: undefined }];
 		}
 	}
 
@@ -578,7 +580,7 @@ export class Color {
 			const r: string = rgba[i];
 
 			if (r.indexOf("%") > -1) {
-				const p: number = Number(r.replace("%","")) / 100;
+				const p: number = Number(r.replace("%", "")) / 100;
 				if (Number(i) < 3) rgba[i] = String(Math.round(p * 255));
 				else rgba[i] = String(p);
 			} else {
@@ -614,7 +616,7 @@ export class Color {
 			a: string = alpha ? hsla[3] : '1';
 
 		if (a.indexOf("%") > -1) {
-			a = String(Number(a.replace("%","")) / 100);
+			a = String(Number(a.replace("%", "")) / 100);
 		}
 
 		if (h.indexOf("deg") > -1) h = h.replace("deg", "");
