@@ -259,7 +259,7 @@ export class Color {
 	}
 
 	public desaturate(value: number): Color {
-		const s: number = this.hsla.s * (1 + (safePct(value) / 100));
+		const s: number = this.hsla.s * (1 - (safePct(value) / 100));
 		this.saturation(Number(s.toFixed(1)));
 
 		return this;
