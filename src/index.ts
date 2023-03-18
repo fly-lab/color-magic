@@ -294,9 +294,9 @@ export class Color {
 	public blend(c: Color, percentage: number = 50): Color {
 		percentage = safePct(percentage) / 100;
 
-		const r: number = Math.round(this.colorChannelMixer(this.rgba.r, c.rgba.r, percentage));
-		const g: number = Math.round(this.colorChannelMixer(this.rgba.g, c.rgba.g, percentage));
-		const b: number = Math.round(this.colorChannelMixer(this.rgba.b, c.rgba.b, percentage));
+		const r: number = Math.round(this.colorChannelMixer(c.rgba.r, this.rgba.r, percentage));
+		const g: number = Math.round(this.colorChannelMixer(c.rgba.g, this.rgba.g, percentage));
+		const b: number = Math.round(this.colorChannelMixer(c.rgba.b, this.rgba.b, percentage));
 
 		this.rgb(r, g, b);
 
