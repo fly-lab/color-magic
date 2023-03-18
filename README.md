@@ -221,3 +221,14 @@ myColor.hsl(120, 50, 50, 1).randomSwatch(5).map(c => c.toHsl());
 // hsla(240, 45%, 45%, 1)
 // hsla(160, 40%, 0%, 1)
 ```
+
+## Color chaining
+
+You can chain methods as per your requirements.
+
+```typescript
+myColor.hsl(120, 50, 50, 1).lighten(10).hue(20).rotate(150).red(100);
+myColor.hsl(120, 50, 50, 1).rgb(10, 50, 40).green(30).analogous();
+myColor.rgb(10, 50, 40).green(30).desaturate(25).toHex();
+myColor.rgb(10, 50, 40).saturate(25).grayscale();
+```
