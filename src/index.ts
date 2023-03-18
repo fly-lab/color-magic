@@ -294,9 +294,9 @@ export class Color {
 	public blend(c: Color, percentage: number = 50): Color {
 		percentage = safePct(percentage) / 100;
 
-		const r: number = this.colorChannelMixer(this.rgba.r, c.rgba.r, percentage);
-		const g: number = this.colorChannelMixer(this.rgba.g, c.rgba.g, percentage);
-		const b: number = this.colorChannelMixer(this.rgba.b, c.rgba.b, percentage);
+		const r: number = Math.round(this.colorChannelMixer(this.rgba.r, c.rgba.r, percentage));
+		const g: number = Math.round(this.colorChannelMixer(this.rgba.g, c.rgba.g, percentage));
+		const b: number = Math.round(this.colorChannelMixer(this.rgba.b, c.rgba.b, percentage));
 
 		this.rgb(r, g, b);
 
@@ -305,10 +305,10 @@ export class Color {
 
 	public grayscale(algorithm: "luminosity" | "averaged" = "luminosity"): Color {
 		if (algorithm === "luminosity") {
-			const value: number = this.rgba.r * 0.3 + this.rgba.g * 0.59 + this.rgba.b * 0.11;
+			const value: number = Math.round(this.rgba.r * 0.3 + this.rgba.g * 0.59 + this.rgba.b * 0.11);
 			this.rgb(value, value, value);
 		} else if (algorithm === "averaged") {
-			const value: number = (this.rgba.r + this.rgba.g + this.rgba.b) / 3;
+			const value: number = Math.round((this.rgba.r + this.rgba.g + this.rgba.b) / 3);
 			this.rgb(value, value, value);
 		}
 
