@@ -25,6 +25,9 @@
 	"keywords": [
 		"color",
 		"color manipulation",
+		"rgb",
+		"hsl",
+		"hex",
 		"typescript"
 	],
 	"scripts": {
