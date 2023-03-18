@@ -352,10 +352,10 @@ export class Color {
 		return l1 > l2 ? div : 1 / div;
 	}
 
-	public level(c: Color): "AAA" | "AA" | "" {
+	public level(c: Color): "AAA" | "AA" | "AA Large" | "" {
 		const ratio: number = this.contrast(c);
 
-		return ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : "";
+		return ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : ratio >= 3.0 ? "AA Large" : "";
 	}
 
 	public complementary(): Color[] {
@@ -420,7 +420,6 @@ export class Color {
 		const colors: Color[] = [this];
 
 		for (let i: number = 1; i < band; i++) {
-			console.log(random())
 			if (i % 2 === 0) {
 				colors.push(new Color().hsl(h, s, l, a).rotate(random() * i * 10).desaturate(random() * i * 5).darken(random() * i * 5));
 			} else {
