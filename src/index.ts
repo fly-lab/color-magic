@@ -352,7 +352,7 @@ export class Color {
 		return l1 > l2 ? div : 1 / div;
 	}
 
-	public level(c: Color): string {
+	public level(c: Color): "AAA" | "AA" | "" {
 		const ratio: number = this.contrast(c);
 
 		return ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : "";
