@@ -1,6 +1,6 @@
-<img src=".media/logo.png" alt="Color Magic" width="300" height="300" style="display: block; margin: 0 auto" />
-
 # Color Magic
+
+<img src=".media/logo.png" alt="Color Magic" width="300" height="300" style="display: block; margin: 0 auto" />
 
 Color magic is a fully typed JavaScript color manipulation library with zero dependency. You can generate, manipulate and access colors in popular color formats.
 
@@ -41,6 +41,30 @@ myColor.hex("#aabbccdd"); // hex six letter with alpha starting #
 // CSS color name construction
 myColor.name("blanchedalmond");
 myColor.name("firebrick");
+```
+
+## Color String Construction
+
+Now you can construct colors from any valid color strings. Check [validation](#color-validation) for details.
+
+```typescript
+// any valid rgb, hsl or hex string
+myColor.string("rgb(255,25,2)");
+myColor.string("rgb(50% 30% 10%)");
+myColor.string("rgba(255 25 2 / 0.5)");
+myColor.string("rgba(50% 30% 10% / 0.5)");
+myColor.string("hsl(180 100% 50%)");
+myColor.string("hsl(180deg 100% 50%)");
+myColor.string("hsl(3.14rad 100% 50%)");
+myColor.string("hsl(0.5turn 100% 50%)");
+myColor.string("hsla(180 100% 50% / 50%)");
+myColor.string("hsla(3.14rad,100%,50%,0.5)");
+myColor.string("hsla(0.5turn 100% 50% / 50%)");
+myColor.string("abc");
+myColor.string("#abc");
+myColor.string("aabbcc");
+myColor.string("#aabbcc");
+myColor.string("#aabbccdd");
 ```
 
 CSS color name construction is fully typed.
@@ -222,7 +246,56 @@ myColor.hsl(120, 50, 50, 1).randomSwatch(5).map(c => c.toHsl());
 // hsla(160, 40%, 0%, 1)
 ```
 
-## Color chaining
+## Color Validation
+
+You can extensively validate rgb, hsl and hex color strings.
+
+```typescript
+myColor.validate("fc32455"); // [true, {method: "hex", alpha: true}]
+myColor.validate("#fc324"); // [true, {method: "hex", alpha: false}]
+myColor.validate("rgba(255 25 2 / 0.5)"); // [true, {method: "rgb", alpha: true}]
+myColor.validate("rgb(50%,30%,10%)"); // [true, {method: "rgb", alpha: false}]
+myColor.validate("hsl(0.5turn 100% 50%)"); // [true, {method: "hsl", alpha: false}]
+myColor.validate("hsl(0.5% 100% 50%)"); // [false, {method: undefined}]
+```
+
+### Valid Color Examples
+
+RGB:
+- rgb(255,25,2)
+- rgb(255 25 2)
+- rgb(50%,30%,10%)
+- rgb(50% 30% 10%)
+- rgba(255,25,2,0.5)
+- rgba(255 25 2 / 0.5)
+- rgba(50%,30%,10%,0.5)
+- rgba(50%,30%,10%,50%)
+- rgba(50% 30% 10% / 0.5)
+- rgba(50% 30% 10% / 50%)
+
+HSL:
+- hsl(180 100% 50%)
+- hsl(180deg,100%,50%)
+- hsl(180deg 100% 50%)
+- hsl(3.14rad,100%,50%)
+- hsl(3.14rad 100% 50%)
+- hsl(0.5turn,100%,50%)
+- hsl(0.5turn 100% 50%)
+- hsla(180,100%,50%,50%)
+- hsla(180 100% 50% / 50%)
+- hsla(180deg,100%,50%,0.5)
+- hsla(3.14rad,100%,50%,0.5)
+- hsla(0.5turn 100% 50% / 50%)
+
+HEX:
+- ad5
+- #ad5
+- adc5f2
+- #adc5f2
+- 7ce945d8
+- #7ce945d8
+
+## Color Chaining
 
 You can chain methods as per your requirements.
 
