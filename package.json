@@ -7,9 +7,11 @@
 	"typings": "dist/index.d.ts",
 	"files": [
 		"dist/*",
+		".media/*",
 		"package.json",
 		"tsconfig.json",
-		".gitignore"
+		".gitignore",
+		"README.md"
 	],
 	"engines": {
 		"node": ">=18"
