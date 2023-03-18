@@ -334,9 +334,9 @@ export class Color {
 	}
 
 	public luminance(): number {
-		const rx: number = this.rgba.r / 100;
-		const gx: number = this.rgba.g / 100;
-		const bx: number = this.rgba.b / 100;
+		const rx: number = this.rgba.r / 255;
+		const gx: number = this.rgba.g / 255;
+		const bx: number = this.rgba.b / 255;
 		const r: number = rx <= 0.03928 ? rx / 12.92 : ((rx + 0.055) / 1.055) ** 2.4;
 		const g: number = gx <= 0.03928 ? gx / 12.92 : ((gx + 0.055) / 1.055) ** 2.4;
 		const b: number = bx <= 0.03928 ? bx / 12.92 : ((bx + 0.055) / 1.055) ** 2.4;
