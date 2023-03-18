@@ -171,3 +171,7 @@ export type NamedColor =
 	| "yellowgreen";
 
 export type ColorNames = Record<NamedColor, string>
+
+export type ValidationResult = [boolean, {
+	method: "hsl" | "rgb" | "hex" | undefined; alpha?: boolean;
+}]

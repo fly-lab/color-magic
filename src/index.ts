@@ -1,4 +1,4 @@
-import { ColorNames, HEX, HSL, NamedColor, RGB } from "./types";
+import { ColorNames, HEX, HSL, NamedColor, RGB, ValidationResult } from "./types";
 import { random, safeAlpha, safeHue, safePct, safeRgb } from "./utils";
 
 export class Color {
@@ -184,6 +184,22 @@ export class Color {
 	public name(name: NamedColor): Color {
 		const hex: string = this.colorNames[name];
 		this.hex(hex);
+
+		return this;
+	}
+
+	public string(c: string): Color {
+		const valid_c: ValidationResult = this.validate(c);
+
+		if (valid_c[0]) {
+			if (valid_c[1].method === "hex") {
+				this.hex(c);
+			} else if (valid_c[1].method === "hsl") {
+				this.fromHslString(c, valid_c[1].alpha!);
+			} else if (valid_c[1].method === "rgb") {
+				this.fromRgbString(c, valid_c[1].alpha!);
+			}
+		}
 
 		return this;
 	}
@@ -482,6 +498,58 @@ export class Color {
 		if (withAlpha) return `hsla(${h}, ${s}%, ${l}%, ${a})`; else return `hsl(${h}, ${s}%, ${l}%)`;
 	}
 
+	public validate(c: string): ValidationResult {
+		const hex = this.validateHex(c);
+		if (hex[0]) return hex;
+
+		const hsl = this.validateHsl(c);
+		if (hsl[0]) return hsl;
+
+		return this.validateRgb(c);
+	}
+
+	public validateRgb(c: string): ValidationResult {
+		const exp : RegExp = /^rgb\((((((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]),\s?)){2}|((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5])\s)){2})((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]))|((((([1-9]?\d(\.\d+)?)|100|(\.\d+))%,\s?){2}|((([1-9]?\d(\.\d+)?)|100|(\.\d+))%\s){2})(([1-9]?\d(\.\d+)?)|100|(\.\d+))%))\)$/i;
+		const expAlpha : RegExp = /^rgba\((((((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]),\s?)){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%,\s?){3}))|(((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5])\s){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%\s){3}))\/\s)((0?\.\d+)|[01]|(([1-9]?\d(\.\d+)?)|100|(\.\d+))%)\)$/i;
+		const method = "rgb";
+
+		if (exp.test(c)) {
+			return [true, {method, alpha: false}];
+		} else if (expAlpha.test(c)) {
+			return [true, {method, alpha: true}];
+		} else {
+			return [false, {method: undefined}];
+		}
+	}
+
+	public validateHsl(c: string): ValidationResult {
+		const exp : RegExp = /^hsl\(((((([12]?[1-9]?\d)|[12]0\d|(3[0-5]\d))(\.\d+)?)|(\.\d+))(deg)?|(0|0?\.\d+)turn|(([0-6](\.\d+)?)|(\.\d+))rad|360)((,\s?(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2}|(\s(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2})\)$/i;
+		const expAlpha : RegExp = /^hsla\(((((([12]?[1-9]?\d)|[12]0\d|(3[0-5]\d))(\.\d+)?)|(\.\d+))(deg)?|(0|0?\.\d+)turn|(([0-6](\.\d+)?)|(\.\d+))rad|360)(((,\s?(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2},\s?)|((\s(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2}\s\/\s))((0?\.\d+)|[01]|(([1-9]?\d(\.\d+)?)|100|(\.\d+))%)\)$/i;
+		const method = "hsl";
+
+		if (exp.test(c)) {
+			return [true, {method, alpha: false}];
+		} else if (expAlpha.test(c)) {
+			return [true, {method, alpha: true}];
+		} else {
+			return [false, {method: undefined}];
+		}
+	}
+
+	public validateHex(c: string): ValidationResult {
+		const exp : RegExp = /^#?([\da-f]{3}){1,2}$/i;
+		const expAlpha : RegExp = /^#?([\da-f]{4}){1,2}$/i;
+		const method = "hex";
+
+		if (exp.test(c)) {
+			return [true, {method, alpha: false}];
+		} else if (expAlpha.test(c)) {
+			return [true, {method, alpha: true}];
+		} else {
+			return [false, {method: undefined}];
+		}
+	}
+
 	private colorChannelMixer(colorChannelA: number, colorChannelB: number, percentage: number): number {
 		const channelA: number = colorChannelA * percentage;
 		const channelB: number = colorChannelB * (1 - percentage);
@@ -499,6 +567,29 @@ export class Color {
 		return this;
 	}
 
+	private fromRgbString(c: string, alpha: boolean): Color {
+		const slice: number = alpha ? 5 : 4;
+		const sep: string = c.indexOf(",") > -1 ? "," : " ";
+		const rgba: string[] = c.slice(slice).split(")")[0].split(sep);
+
+		if (rgba.indexOf("/") > -1) rgba.splice(3, 1);
+
+		for (let i: number = 0; i < rgba.length; i++) {
+			const r: string = rgba[i];
+
+			if (r.indexOf("%") > -1) {
+				const p: number = Number(r.replace("%","")) / 100;
+				if (Number(i) < 3) rgba[i] = String(Math.round(p * 255));
+				else rgba[i] = String(p);
+			} else {
+				if (Number(i) > 2) rgba[i] = r;
+			}
+		}
+		this.rgb(Number(rgba[0]), Number(rgba[1]), Number(rgba[2]), rgba[3] ? Number(rgba[3]) : 1);
+
+		return this;
+	}
+
 	private fromHsl(hsl: HSL): Color {
 		this.hsla = {
 			h: safeHue(hsl.h),
@@ -506,6 +597,31 @@ export class Color {
 			l: safePct(hsl.l),
 			a: hsl.a !== undefined ? safeAlpha(hsl.a) : this.hsla.a,
 		};
+
+		return this;
+	}
+
+	private fromHslString(c: string, alpha: boolean): Color {
+		const slice: number = alpha ? 5 : 4;
+		const sep: string = c.indexOf(",") > -1 ? "," : " ";
+		const hsla: string[] = c.slice(slice).split(")")[0].split(sep);
+
+		if (hsla.indexOf("/") > -1) hsla.splice(3, 1);
+
+		let h: string = hsla[0],
+			s: string = hsla[1].replace("%",""),
+			l: string = hsla[2].replace("%",""),
+			a: string = alpha ? hsla[3] : '1';
+
+		if (a.indexOf("%") > -1) {
+			a = String(Number(a.replace("%","")) / 100);
+		}
+
+		if (h.indexOf("deg") > -1) h = h.replace("deg", "");
+		else if (h.indexOf("rad") > -1) h = String(Math.round(Number(h.replace("rad", "")) * (180 / Math.PI)));
+		else if (h.indexOf("turn") > -1) h = String(Math.round(Number(h.replace("turn", "")) * 360));
+
+		this.hsl(Number(h), Number(s), Number(l), Number(a));
 
 		return this;
 	}
