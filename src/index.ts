@@ -7,25 +7,16 @@ export class Color {
 	private hexa: HEX = { x: "00", y: "00", z: "00", a: "ff" };
 	private colorNames: ColorNames = colorNamesJson;
 
-	public static string(c: string): Color {
-		const self: Color = new Color();
-		const valid_c: ValidationResult = self.validate(c);
-
-		if (valid_c[0]) {
-			if (valid_c[1].method === "hex") {
-				self.hex(c);
-			} else if (valid_c[1].method === "hsl") {
-				self.fromHslString(c, valid_c[1].alpha!);
-			} else if (valid_c[1].method === "rgb") {
-				self.fromRgbString(c, valid_c[1].alpha!);
-			}
-		}
-
-		return self;
+	public static isValid(c: string | NamedColor): boolean {
+		return new Color().validate(c)[0];
 	}
 
-	public static isValid(c: string): boolean {
-		return new Color().validate(c)[0];
+	public static string(c: string): Color {
+		return new Color().string(c);
+	}
+
+	public static validate(c: string | NamedColor): ValidationResult {
+		return new Color().validate(c);
 	}
 
 	public rgb(r: number, g: number, b: number, a?: number): Color {
@@ -379,14 +370,27 @@ export class Color {
 		if (withAlpha) return `hsla(${h}, ${s}%, ${l}%, ${a})`; else return `hsl(${h}, ${s}%, ${l}%)`;
 	}
 
-	public validate(c: string): ValidationResult {
-		const hex: ValidationResult = this.validateHex(c);
+	public validate(c: string | NamedColor): ValidationResult {
+		const hex = this.validateHex(c);
 		if (hex[0]) return hex;
 
-		const hsl: ValidationResult = this.validateHsl(c);
+		const hsl = this.validateHsl(c);
 		if (hsl[0]) return hsl;
 
+		const css = this.validateName(c as NamedColor);
+		if (css[0]) return css;
+
 		return this.validateRgb(c);
+	}
+
+	public validateName(c: NamedColor): ValidationResult {
+		const method = "css_name";
+
+		if (Object.keys(this.colorNames).includes(c)) {
+			return [true, {method, alpha: true}];
+		} else {
+			return [false, {method: undefined}];
+		}
 	}
 
 	public validateRgb(c: string): ValidationResult {
