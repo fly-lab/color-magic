@@ -1,3 +1,5 @@
+import { Color } from "./index";
+
 export interface RGB {
 	r: number;
 	g: number;
@@ -177,3 +179,21 @@ export type ColorMethod = "hsl" | "rgb" | "hex" | undefined;
 export type ValidationResult = [boolean, {
 	method: ColorMethod; alpha?: boolean;
 }]
+
+export type BlenderCb = (source: Color, ref: Color, mode: BlendMode) => Color;
+
+export type ModeCb = (sourceChannel: number, refChannel: number) => number;
+
+export type BlendMode =
+	| "normal"
+	| "multiply"
+	| "screen"
+	| "overlay"
+	| "difference"
+	| "exclusion"
+	| "darken"
+	| "lighten"
+	| "dodge"
+	| "burn"
+	| "hard"
+	| "soft";
