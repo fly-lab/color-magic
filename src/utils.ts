@@ -1,4 +1,4 @@
-import { BlendMode, ColorNames, ModeCb } from "./types";
+import { BlendMode, ColorNames, ModeCb, RGB } from "./types";
 
 export const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
 
@@ -197,3 +197,5 @@ export const colorNamesJson: ColorNames = {
 	"yellow": "#ffff00",
 	"yellowgreen": "#9acd32",
 };
+
+export const rgbDistance = (c1: RGB, c2: RGB): number => Math.sqrt(Math.pow(c1.r - c2.r, 2) + Math.pow(c1.g - c2.g, 2) + Math.pow(c1.b - c2.b, 2));

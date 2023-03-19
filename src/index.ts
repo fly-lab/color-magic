@@ -10,7 +10,7 @@ import {
 	RGB,
 	ValidationResult,
 } from "./types";
-import { colorNamesJson, random, safeAlpha, safeHue, safePct, safeRgb, separableBlend } from "./utils";
+import { colorNamesJson, random, rgbDistance, safeAlpha, safeHue, safePct, safeRgb, separableBlend } from "./utils";
 
 export class Color {
 	private rgba: RGB = { r: 0, g: 0, b: 0, a: 1 };
@@ -28,6 +28,13 @@ export class Color {
 
 	public static string(c: string): Color {
 		return new Color().string(c);
+	}
+
+	public static getName(c: PossibleColors): PossibleColorStrings {
+		const col: string = new Color().base(c).toHex(false);
+		const arr: [string, string][] = Object.entries(new Color().colorNames);
+		const index: number = arr.findIndex(c => c[1] === col);
+		return index > -1 ? arr[index][0] : col;
 	}
 
 	public static validate(c: string | NamedColor): ValidationResult {
@@ -55,6 +62,15 @@ export class Color {
 		const col: Color = new Color().base(c);
 		const set2: Color[] = new Color().fromHueArray(col.rotate(hue), [90]);
 		return [...set1, ...set2];
+	}
+
+	public static distance(c1: PossibleColors, c2: PossibleColors): number {
+		return rgbDistance(new Color().base(c1).toRgbObj(), new Color().base(c2).toRgbObj());
+	}
+
+	public getName(): PossibleColorStrings {
+		// console.log(this.toHex())
+		return Color.getName(this.toHex());
 	}
 
 	public rgb(r: number, g: number, b: number, a?: number): Color {
@@ -282,6 +298,10 @@ export class Color {
 		const ratio: number = this.contrast(c);
 
 		return ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : ratio >= 3.0 ? "AA Large" : "";
+	}
+
+	public distance(c: PossibleColors): number {
+		return rgbDistance(this.toRgbObj(), new Color().base(c).toRgbObj());
 	}
 
 	public complementary(): Color[] {
