@@ -68,8 +68,115 @@ export class Color {
 		return rgbDistance(new Color().base(c1).toRgbObj(), new Color().base(c2).toRgbObj());
 	}
 
+	public static temperature(kelvin: number, method: "tanner_helland" | "curve_fitting" = "curve_fitting"): Color {
+		if (method === "tanner_helland") {
+			const temperature: number = kelvin / 100.0;
+			let r: number, g: number, b: number;
+
+			/* Calculate red */
+			if (temperature <= 66.0) {
+				r = 255;
+			} else {
+				r = temperature - 60.0;
+				r = 329.698727446 * Math.pow(r, -0.1332047592);
+				if (r < 0) r = 0;
+				if (r > 255) r = 255;
+			}
+
+			/* Calculate green */
+			if (temperature <= 66.0) {
+				g = 99.4708025861 * Math.log(temperature) - 161.1195681661;
+				if (g < 0) g = 0;
+				if (g > 255) g = 255;
+			} else {
+				g = temperature - 60.0;
+				g = 288.1221695283 * Math.pow(g, -0.0755148492);
+				if (g < 0) g = 0;
+				if (g > 255) g = 255;
+			}
+
+			/* Calculate blue */
+			if (temperature >= 66.0) {
+				b = 255;
+			} else {
+				if (temperature <= 19.0) {
+					b = 0;
+				} else {
+					b = temperature - 10;
+					b = 138.5177312231 * Math.log(b) - 305.0447927307;
+					if (b < 0) b = 0;
+					if (b > 255) b = 255;
+				}
+			}
+
+			return new Color().rgb(Math.round(r), Math.round(g), Math.round(b), 1);
+		} else {
+			const temperature: number = kelvin / 100.0;
+			let r: number, g: number, b: number;
+
+			/* Calculate red */
+			if (temperature < 66.0) {
+				r = 255;
+			} else {
+				r = temperature - 55.0;
+				r = 351.97690566805693 + 0.114206453784165 * r - 40.25366309332127 * Math.log(r);
+				if (r < 0) r = 0;
+				if (r > 255) r = 255;
+			}
+
+			/* Calculate green */
+			if (temperature < 66.0) {
+				g = temperature - 2;
+				g = -155.25485562709179 - 0.44596950469579133 * g + 104.49216199393888 * Math.log(g);
+				if (g < 0) g = 0;
+				if (g > 255) g = 255;
+
+			} else {
+				g = temperature - 50.0;
+				g = 325.4494125711974 + 0.07943456536662342 * g - 28.0852963507957 * Math.log(g);
+				if (g < 0) g = 0;
+				if (g > 255) g = 255;
+			}
+
+			/* Calculate blue */
+			if (temperature >= 66.0) {
+				b = 255;
+			} else {
+				if (temperature <= 20.0) {
+					b = 0;
+				} else {
+					b = temperature - 10;
+					b = -254.76935184120902 + 0.8274096064007395 * b + 115.67994401066147 * Math.log(b);
+					if (b < 0) b = 0;
+					if (b > 255) b = 255;
+				}
+			}
+
+			return new Color().rgb(Math.round(r), Math.round(g), Math.round(b), 1);
+		}
+	}
+
+	public static toTemperature(c: PossibleColors): number {
+		const base: Color = new Color().base(c);
+		let temperature: number = 0, testRGB: Color;
+		const epsilon: number = 0.4;
+		let minTemperature: number = 1000;
+		let maxTemperature: number = 40000;
+
+		while (maxTemperature - minTemperature > epsilon) {
+			temperature = (maxTemperature + minTemperature) / 2;
+			testRGB = this.temperature(temperature);
+			if ((testRGB.toRgbObj().b / testRGB.toRgbObj().r) >= (base.toRgbObj().b / base.toRgbObj().r)) {
+				maxTemperature = temperature;
+			} else {
+				minTemperature = temperature;
+			}
+		}
+
+		return Math.round(temperature);
+	}
+
 	public getName(): PossibleColorStrings {
-		// console.log(this.toHex())
 		return Color.getName(this.toHex());
 	}
 
