@@ -5,6 +5,7 @@ import {
 	HEX,
 	HSL,
 	NamedColor,
+	PossibleColors,
 	PossibleColorStrings,
 	RGB,
 	ValidationResult,
@@ -31,6 +32,29 @@ export class Color {
 
 	public static validate(c: string | NamedColor): ValidationResult {
 		return new Color().validate(c);
+	}
+
+	public static complementary(c: PossibleColors): Color[] {
+		return new Color().fromHueArray(c, [180]);
+	}
+
+	public static analogous(c: PossibleColors): Color[] {
+		return new Color().fromHueArray(c, [30, 60]);
+	}
+
+	public static triadic(c: PossibleColors): Color[] {
+		return new Color().fromHueArray(c, [120, 240]);
+	}
+
+	public static splitComplementary(c: PossibleColors): Color[] {
+		return new Color().fromHueArray(c, [150, 210]);
+	}
+
+	public static doubleComplementary(c: PossibleColors, hue: number): Color[] {
+		const set1: Color[] = new Color().fromHueArray(c, [90]);
+		const col: Color = new Color().base(c);
+		const set2: Color[] = new Color().fromHueArray(col.rotate(hue), [90]);
+		return [...set1, ...set2];
 	}
 
 	public rgb(r: number, g: number, b: number, a?: number): Color {
@@ -64,7 +88,7 @@ export class Color {
 		return this;
 	}
 
-	public string(c: string): Color {
+	public string(c: PossibleColorStrings): Color {
 		const valid_c: ValidationResult = this.validate(c);
 
 		if (valid_c[0]) {
@@ -74,6 +98,8 @@ export class Color {
 				this.fromHslString(c, valid_c[1].alpha!);
 			} else if (valid_c[1].method === "rgb") {
 				this.fromRgbString(c, valid_c[1].alpha!);
+			} else if (valid_c[1].method === "css_name") {
+				this.name(c as NamedColor);
 			}
 		}
 
@@ -259,43 +285,23 @@ export class Color {
 	}
 
 	public complementary(): Color[] {
-		const c1: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(180);
-
-		return [this, c1];
+		return Color.complementary(this);
 	}
 
 	public analogous(): Color[] {
-		const a1: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(30);
-		const a2: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(60);
-
-		return [this, a1, a2];
+		return Color.analogous(this);
 	}
 
 	public triadic(): Color[] {
-		const a1: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(120);
-		const a2: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(240);
-
-		return [this, a1, a2];
+		return Color.triadic(this);
 	}
 
 	public splitComplementary(): Color[] {
-		const a1: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(150);
-		const a2: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(210);
-
-		return [this, a1, a2];
+		return Color.splitComplementary(this);
 	}
 
 	public doubleComplementary(hue: number): Color[] {
-		// 90 degrees complementary of current color
-		const a1: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(90);
-
-		// Color calculated from hue
-		const a2: Color = new Color().hsl(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a).rotate(hue);
-
-		// 90 degrees complementary of new color
-		const a3: Color = new Color().hsl(a2.hsla.h, a2.hsla.s, a2.hsla.l, a2.hsla.a).rotate(90);
-
-		return [this, a1, a2, a3];
+		return Color.doubleComplementary(this, hue);
 	}
 
 	public swatch(band: 3 | 5 | 7 | 9 = 5): Color[] {
@@ -338,15 +344,15 @@ export class Color {
 		};
 	}
 
-	public toRgbObj(): object {
+	public toRgbObj(): RGB {
 		return this.rgba;
 	}
 
-	public toHslObj(): object {
+	public toHslObj(): HSL {
 		return this.hsla;
 	}
 
-	public toHexObj(): object {
+	public toHexObj(): HEX {
 		return this.hexa;
 	}
 
@@ -384,14 +390,14 @@ export class Color {
 		if (withAlpha) return `hsla(${h}, ${s}%, ${l}%, ${a})`; else return `hsl(${h}, ${s}%, ${l}%)`;
 	}
 
-	public validate(c: string | NamedColor): ValidationResult {
-		const hex = this.validateHex(c);
+	public validate(c: PossibleColorStrings): ValidationResult {
+		const hex: ValidationResult = this.validateHex(c);
 		if (hex[0]) return hex;
 
-		const hsl = this.validateHsl(c);
+		const hsl: ValidationResult = this.validateHsl(c);
 		if (hsl[0]) return hsl;
 
-		const css = this.validateName(c as NamedColor);
+		const css: ValidationResult = this.validateName(c as NamedColor);
 		if (css[0]) return css;
 
 		return this.validateRgb(c);
@@ -401,9 +407,9 @@ export class Color {
 		const method = "css_name";
 
 		if (Object.keys(this.colorNames).includes(c)) {
-			return [true, {method, alpha: true}];
+			return [true, { method, alpha: true }];
 		} else {
-			return [false, {method: undefined}];
+			return [false, { method: undefined }];
 		}
 	}
 
@@ -447,6 +453,15 @@ export class Color {
 		} else {
 			return [false, { method: undefined }];
 		}
+	}
+
+	private base(c: PossibleColors): Color {
+		return c instanceof Color ? new Color().fromHsl(c.toHslObj()) : new Color().string(c);
+	}
+
+	private fromHueArray(c: PossibleColors, hue: number[]): Color[] {
+		const base: Color = this.base(c);
+		return [base, ...hue.map((h: number) => new Color().fromHsl(base.toHslObj()).rotate(h))];
 	}
 
 	private blenderCb(source: Color, ref: Color, mode: BlendMode): RGB {
