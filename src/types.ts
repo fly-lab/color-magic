@@ -172,7 +172,11 @@ export type NamedColor =
 	| "yellow"
 	| "yellowgreen";
 
-export type ColorNames = Record<NamedColor, string>
+export type ColorNames = Record<NamedColor, string>;
+
+export type PossibleColors = NamedColor | Color | string;
+
+export type PossibleColorStrings = NamedColor | string;
 
 export type ColorMethod = "hsl" | "rgb" | "hex" | "css_name" | undefined;
 

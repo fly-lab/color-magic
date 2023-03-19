@@ -1,4 +1,14 @@
-import { BlendMode, ColorMethod, ColorNames, HEX, HSL, NamedColor, RGB, ValidationResult } from "./types";
+import {
+	BlendMode,
+	ColorMethod,
+	ColorNames,
+	HEX,
+	HSL,
+	NamedColor,
+	PossibleColorStrings,
+	RGB,
+	ValidationResult,
+} from "./types";
 import { colorNamesJson, random, safeAlpha, safeHue, safePct, safeRgb, separableBlend } from "./utils";
 
 export class Color {
@@ -6,6 +16,10 @@ export class Color {
 	private hsla: HSL = { h: 0, s: 0, l: 0, a: 1 };
 	private hexa: HEX = { x: "00", y: "00", z: "00", a: "ff" };
 	private colorNames: ColorNames = colorNamesJson;
+
+	public constructor(c?: PossibleColorStrings) {
+		if (c) this.string(c);
+	}
 
 	public static isValid(c: string | NamedColor): boolean {
 		return new Color().validate(c)[0];
