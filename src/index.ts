@@ -176,6 +176,15 @@ export class Color {
 		return Math.round(temperature);
 	}
 
+	public static blend(source: PossibleColors, ref: PossibleColors, mode: BlendMode = "normal"): Color {
+		const sourceC: Color = new Color().base(source);
+		const refC: Color = new Color().base(ref);
+		const a: number = Number((sourceC.rgba.a! + refC.rgba.a! - sourceC.rgba.a! * refC.rgba.a!).toFixed(2));
+		const rgb: RGB = new Color().blenderCb(sourceC, refC, mode);
+
+		return new Color().rgb(rgb.r, rgb.g, rgb.b, a);
+	}
+
 	public getName(): PossibleColorStrings {
 		return Color.getName(this.toHex());
 	}
@@ -344,10 +353,9 @@ export class Color {
 		return this;
 	}
 
-	public blend(ref: Color, mode: BlendMode = "normal"): Color {
-		const a: number = Number((this.rgba.a! + ref.rgba.a! - this.rgba.a! * ref.rgba.a!).toFixed(2));
-		const rgb: RGB = this.blenderCb(this, ref, mode);
-		this.rgb(rgb.r, rgb.g, rgb.b, a);
+	public blend(ref: PossibleColors, mode: BlendMode = "normal"): Color {
+		const c: Color = Color.blend(this, ref, mode);
+		this.rgb(c.rgba.r, c.rgba.g, c.rgba.b, c.rgba.a);
 
 		return this;
 	}
