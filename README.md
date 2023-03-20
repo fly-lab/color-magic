@@ -23,6 +23,11 @@ const myColor = new Color();
 ## Color Constructions
 
 ```typescript
+// with constructor
+const color1 = new Color("firebrick");
+const color2 = new Color("#12ccd5");
+const color3 = new Color("rgba(50% 30% 10% / 50%)");
+
 // RGB construction
 myColor.rgb(100, 150, 200); // with r, g and b values
 myColor.rgb(100, 150, 200, 0.5); // with r, g, b and alpha values
@@ -41,6 +46,10 @@ myColor.hex("#aabbccdd"); // hex six letter with alpha starting #
 // CSS color name construction
 myColor.name("blanchedalmond");
 myColor.name("firebrick");
+
+// temperature construction
+Color.temperature(15000, "tanner_helland"); // rgba(181, 205, 255, 1)
+Color.temperature(15000, "curve_fitting"); // rgba(180, 204, 255, 1)
 ```
 
 ## Color String Construction
@@ -117,10 +126,18 @@ myColor.rgb(50, 100, 200, 0.5).grayscale("luminosity"); // rgba(50, 100, 200, 0.
 // by averaged algorithom
 myColor.rgb(50, 100, 200, 0.5).grayscale("averaged"); // rgba(50, 100, 200, 0.5) -> rgba(117, 117, 117, 0.5)
 
+// color mix
+const mixColor = new Color().hsl(100, 50, 50, 1);
+// 80% myColor + 20% blendColor mix
+myColor.rgb(50, 100, 200, 0.5).mix(mixColor, 20) // rgba(50, 100, 200, 0.5) -> rgba(61, 118, 173, 0.5)
+
 // color blend
-const blendColor = new Color().hsl(100, 50, 50, 1);
-// 80% myColor + 20% blendColor blend
-myColor.rgb(50, 100, 200, 0.5).blend(blendColor, 20) // rgba(50, 100, 200, 0.5) -> rgba(61, 118, 173, 0.5)
+// blend modes: "normal", "multiply", "screen", "overlay", 
+//              "difference", "exclusion", "darken", "lighten",
+//              "dodge", "burn", "hard", "soft"
+Color.blend("#125", "#ca4", "exclusion").toRgb(); // rgba(194, 159, 108, 1)
+Color.blend("#a4152525", "#ca4a75f8", "exclusion").toRgb(); // rgba(106, 83, 120, 0.97)
+myColor.rgb(50, 100, 200, 0.5).blend("#a4152525", "hard").toRgb(); // rgba(73, 0, 0, 1)
 ```
 
 ## Color Query
@@ -158,6 +175,18 @@ myColor.toHex(false); // #40bf40
 myColor.toHexObj(); // {x: '40', y: 'bf', z: '40', a: 'ff'}
 ```
 
+## Color Name
+
+CSS color names can be obtained from color object. If color name is not matched, it will return hex string.
+
+```typescript
+// static query
+Color.getName("rgba(46, 139, 87, 1)"); // seagreen
+myColor.string("rgba(46, 139, 87, 1)").getName(); // seagreen
+myColor.string("#708090").getName(); // slategray
+myColor.string("rgba(30, 50, 100, 1)").getName(); // #1e3264
+```
+
 ## Color Information
 
 ```typescript
@@ -179,6 +208,13 @@ myColor.hsl(120, 50, 50).level(levelColor); // "AAA"
 myColor.hsl(120, 50, 50).isDark();
 // is the color light
 myColor.hsl(120, 50, 50).isLight();
+
+// distance between two color
+Color.distance("rgba(50% 30% 10% / 50%)", "#21ca78") // 182.9918
+myColor.string("rgba(50% 30% 10% / 50%)").distance("#21ca78") // 182.9918
+
+// color temperature
+Color.toTemperature("#21ca78") // 40000
 ```
 
 ## Complementary Colors
@@ -191,6 +227,8 @@ myColor.hsl(120, 50, 50, 1).complementary();
 myColor.hsl(120, 50, 50, 1).complementary().map(c => c.toHsl());
 // hsla(120, 50%, 50%, 1)
 // hsla(300, 50%, 50%, 1)
+Color.string("rgba(50% 30% 10% / 50%)").complementary();
+Color.string("rgba(50% 30% 10% / 50%)").complementary().map(c => c.toHsl());
 
 // analogous colors
 // gives array of self color and it's analogous colors
@@ -199,6 +237,8 @@ myColor.hsl(120, 50, 50, 1).analogous().map(c => c.toHsl());
 // hsla(120, 50%, 50%, 1)
 // hsla(150, 50%, 50%, 1)
 // hsla(180, 50%, 50%, 1)
+Color.string("rgba(50% 30% 10% / 50%)").analogous();
+Color.string("rgba(50% 30% 10% / 50%)").analogous().map(c => c.toHsl());
 
 // triadic colors
 // gives array of self color and it's triadic analogous colors
@@ -207,6 +247,8 @@ myColor.hsl(120, 50, 50, 1).triadic().map(c => c.toHsl());
 // hsla(120, 50%, 50%, 1)
 // hsla(240, 50%, 50%, 1)
 // hsla(360, 50%, 50%, 1)
+Color.string("rgba(50% 30% 10% / 50%)").triadic();
+Color.string("rgba(50% 30% 10% / 50%)").triadic().map(c => c.toHsl());
 
 // split complementary colors
 // gives array of self color and it's split complementary colors
@@ -215,6 +257,8 @@ myColor.hsl(120, 50, 50, 1).splitComplementary().map(c => c.toHsl());
 // hsla(120, 50%, 50%, 1)
 // hsla(270, 50%, 50%, 1)
 // hsla(330, 50%, 50%, 1)
+Color.string("rgba(50% 30% 10% / 50%)").splitComplementary();
+Color.string("rgba(50% 30% 10% / 50%)").splitComplementary().map(c => c.toHsl());
 
 // split double complementary colors
 // gives array of self color, shifted hue color and complementary colors of both
@@ -224,6 +268,8 @@ myColor.hsl(120, 50, 50, 1).doubleComplementary(-30).map(c => c.toHsl());
 // hsla(210, 50%, 50%, 1)
 // hsla(90, 50%, 50%, 1)
 // hsla(180, 50%, 50%, 1)
+Color.string("rgba(50% 30% 10% / 50%)").doubleComplementary();
+Color.string("rgba(50% 30% 10% / 50%)").doubleComplementary().map(c => c.toHsl());
 
 // swatch colors
 // gives array of self color with shifted colors
@@ -251,12 +297,33 @@ myColor.hsl(120, 50, 50, 1).randomSwatch(5).map(c => c.toHsl());
 You can extensively validate rgb, hsl and hex color strings.
 
 ```typescript
+myColor.validate("firebrick"); // [true, {method: "css_name", alpha: true}]
 myColor.validate("fc32455"); // [true, {method: "hex", alpha: true}]
 myColor.validate("#fc324"); // [true, {method: "hex", alpha: false}]
 myColor.validate("rgba(255 25 2 / 0.5)"); // [true, {method: "rgb", alpha: true}]
 myColor.validate("rgb(50%,30%,10%)"); // [true, {method: "rgb", alpha: false}]
 myColor.validate("hsl(0.5turn 100% 50%)"); // [true, {method: "hsl", alpha: false}]
 myColor.validate("hsl(0.5% 100% 50%)"); // [false, {method: undefined}]
+```
+
+### Static Validation Check
+
+```typescript
+import { Color } from "./index";
+
+Color.isValid("firebrick"); // true
+Color.isValid("fc32455"); // true
+Color.isValid("fc"); // false
+Color.isValid("rgba(255 25 2 / 0.5)"); // true
+Color.isValid("rgb(50%,30%,10%)"); // true
+Color.isValid("hsl(0.5% 100% 50%)"); // false
+Color.validate("firebrick"); // [true, {method: "css_name", alpha: true}]
+Color.validate("fc32455"); // [true, {method: "hex", alpha: true}]
+Color.validate("#fc324"); // [true, {method: "hex", alpha: false}]
+Color.validate("rgba(255 25 2 / 0.5)"); // [true, {method: "rgb", alpha: true}]
+Color.validate("rgb(50%,30%,10%)"); // [true, {method: "rgb", alpha: false}]
+Color.validate("hsl(0.5turn 100% 50%)"); // [true, {method: "hsl", alpha: false}]
+Color.validate("hsl(0.5% 100% 50%)"); // [false, {method: undefined}]
 ```
 
 ### Valid Color Examples
