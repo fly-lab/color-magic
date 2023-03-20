@@ -53,7 +53,7 @@
 		"publish:npm": "npm publish --access public",
 		"check:yarn": "if command -v check-npm-yarn > /dev/null; then check-npm-yarn; fi"
 	},
-	"module": "dist/color-magic.esm.js",
+	"module": "dist/index.js",
 	"size-limit": [
 		{
 			"path": "dist/color-magic.cjs.production.min.js",
