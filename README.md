@@ -1,6 +1,8 @@
 # Color Magic
 
-<img src=".media/logo.png" alt="Color Magic" width="300" height="300" style="display: block; margin: 0 auto" />
+<p align="center">
+    <img src=".media/logo.png" alt="Color Magic" width="300" height="300" />
+</p>
 
 Color magic is a fully typed JavaScript color manipulation library with zero dependency. You can generate, manipulate and access colors in popular color formats.
 
