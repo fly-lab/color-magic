@@ -1,10 +1,39 @@
 # Color Magic
 
+<!-- AUTO-GENERATED-CONTENT:START (VERSIONBADGE) -->
+[![npm](https://img.shields.io/badge/npm-v5.0.2-green.svg)](https://www.npmjs.com/package/@fly-lab/color-magic)
+<!-- AUTO-GENERATED-CONTENT:END -->
+
 <p align="center">
     <img src=".media/logo.png" alt="Color Magic" width="300" height="300" />
 </p>
 
 Color magic is a fully typed JavaScript color manipulation library with zero dependency. You can generate, manipulate and access colors in popular color formats.
+
+## Table of Contents
+
+<!-- AUTO-GENERATED-CONTENT:START (TOC:collapse=true&collapseText=Click to expand) -->
+<details>
+<summary>Click to expand</summary>
+
+- [Install](#install)
+- [Usage](#usage)
+- [Color Constructions](#color-constructions)
+- [Color String Construction](#color-string-construction)
+- [Color Property Update](#color-property-update)
+- [Color Manipulation](#color-manipulation)
+- [Color Query](#color-query)
+- [Color Name](#color-name)
+- [Color Information](#color-information)
+- [Complementary Colors](#complementary-colors)
+- [Color Validation](#color-validation)
+  - [Static Validation Check](#static-validation-check)
+  - [Valid Color Examples](#valid-color-examples)
+- [Color Chaining](#color-chaining)
+- [Contributors](#contributors)
+
+</details>
+<!-- AUTO-GENERATED-CONTENT:END -->
 
 ## Install
 
@@ -374,3 +403,11 @@ myColor.hsl(120, 50, 50, 1).rgb(10, 50, 40).green(30).analogous();
 myColor.rgb(10, 50, 40).green(30).desaturate(25).toHex();
 myColor.rgb(10, 50, 40).saturate(25).grayscale();
 ```
+
+## Contributors
+
+<!-- AUTO-GENERATED-CONTENT:START (CONTRIBUTORS) -->
+| **Commits** | **Contributor**                             |
+|-------------|---------------------------------------------|
+| 59          | [dhnchandan](https://github.com/dhnchandan) |
+<!-- AUTO-GENERATED-CONTENT:END -->
