@@ -1,7 +1,7 @@
 # Color Magic
 
 <!-- AUTO-GENERATED-CONTENT:START (VERSIONBADGE) -->
-[![npm](https://img.shields.io/badge/npm-v5.0.2-green.svg)](https://www.npmjs.com/package/@fly-lab/color-magic)
+[![npm](https://img.shields.io/badge/npm-v5.1.0-green.svg)](https://www.npmjs.com/package/@fly-lab/color-magic)
 <!-- AUTO-GENERATED-CONTENT:END -->
 
 <p align="center">
@@ -409,5 +409,6 @@ myColor.rgb(10, 50, 40).saturate(25).grayscale();
 <!-- AUTO-GENERATED-CONTENT:START (CONTRIBUTORS) -->
 | **Commits** | **Contributor**                             |
 |-------------|---------------------------------------------|
-| 59          | [dhnchandan](https://github.com/dhnchandan) |
+| 61          | [dhnchandan](https://github.com/dhnchandan) |
+
 <!-- AUTO-GENERATED-CONTENT:END -->
