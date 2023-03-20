@@ -14,7 +14,7 @@ export const safeAlpha = (value: number): number => clamp(value, 0, 1);
 
 export const random = (min: number = 0, max: number = 10): number => Math.floor(Math.random() * (max - min) + min);
 
-export const normal = (source: number, ref: number): number => ref;
+export const normal = (source: number, ref: number): number => ref + source * 0;
 export const multiply = (source: number, ref: number): number => source * ref;
 export const screen = (source: number, ref: number): number => source + ref - source * ref;
 export const hard = (source: number, ref: number): number => ref <= 0.5 ? multiply(source, ref * 2) : screen(source, ref * 2 - 1);
