@@ -1,7 +1,7 @@
 # Color Magic
 
 <!-- AUTO-GENERATED-CONTENT:START (VERSIONBADGE) -->
-[![npm](https://img.shields.io/badge/npm-v5.1.0-green.svg)](https://www.npmjs.com/package/@fly-lab/color-magic)
+[![npm](https://img.shields.io/badge/npm-v5.2.0-green.svg)](https://www.npmjs.com/package/@fly-lab/color-magic)
 <!-- AUTO-GENERATED-CONTENT:END -->
 
 <p align="center">
@@ -16,7 +16,8 @@ Color magic is a fully typed JavaScript color manipulation library with zero dep
 <details>
 <summary>Click to expand</summary>
 
-- [Install](#install)
+- [Installation](#installation)
+- [Features](#features)
 - [Usage](#usage)
 - [Color Constructions](#color-constructions)
 - [Color String Construction](#color-string-construction)
@@ -35,13 +36,26 @@ Color magic is a fully typed JavaScript color manipulation library with zero dep
 </details>
 <!-- AUTO-GENERATED-CONTENT:END -->
 
-## Install
+## Installation
 
 ```shell
 $ npm i @fly-lab/color-magic
 $ pnpm i @fly-lab/color-magic
 $ yarn add @fly-lab/color-magic
 ```
+
+## Features
+
+- color construction from RGB, HSL, HEX, CSS named color and kelvin temperature
+- color conversions
+- color manipulations like rotating, lightening, darkening, saturating, desaturating, fading, brightening, negating, gray scaling, mixing, blending
+- color blending supports modes normal, multiply, screen, overlay, difference, exclusion, darken, lighten, dodge, burn, hard and soft
+- color query to RGB, HSL, HEX string and objects
+- get CSS color names from color
+- color information like luminance, contrast, level, is dark, is light, distance, temperature etc.
+- complementary, analogous, triadic, split complementary, double complementary of colors
+- color swatch generation (will be developed more)
+- any color string validation
 
 ## Usage
 
@@ -409,6 +423,6 @@ myColor.rgb(10, 50, 40).saturate(25).grayscale();
 <!-- AUTO-GENERATED-CONTENT:START (CONTRIBUTORS) -->
 | **Commits** | **Contributor**                             |
 |-------------|---------------------------------------------|
-| 61          | [dhnchandan](https://github.com/dhnchandan) |
+| 62          | [dhnchandan](https://github.com/dhnchandan) |
 
 <!-- AUTO-GENERATED-CONTENT:END -->
