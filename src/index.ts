@@ -12,7 +12,16 @@ import {
 } from "./types";
 import { random, safeAlpha, safeHue, safePct, safeRgb } from "./utils";
 import { colorNamesJson } from "./consts";
-import { rgbDistance, separableBlend } from "./algorithoms";
+import {
+	hslToRgb,
+	rgbDistance,
+	rgbToHsl,
+	separableBlend,
+	toB10Alpha,
+	toB16Ch,
+	toB255Alpha,
+	toHexCh,
+} from "./algorithoms";
 
 export class Color {
 	private rgba: RGB = { r: 0, g: 0, b: 0, a: 1 };
@@ -719,102 +728,35 @@ export class Color {
 	}
 
 	private rgbToHex(): Color {
-		const x: string = this.rgba.r.toString(16).padStart(2, "0");
-		const y: string = this.rgba.g.toString(16).padStart(2, "0");
-		const z: string = this.rgba.b.toString(16).padStart(2, "0");
-		const a: string = Math.round(this.rgba.a! * 255).toString(16).padStart(2, "0");
-
-		this.hexa = { x, y, z, a };
+		this.hexa = {
+			x: toHexCh(this.rgba.r),
+			y: toHexCh(this.rgba.g),
+			z: toHexCh(this.rgba.b),
+			a: toHexCh(toB255Alpha(this.rgba.a!)),
+		};
 
 		return this;
 	}
 
 	private hexToRgb(): Color {
-		const r: number = Number("0x" + this.hexa.x);
-		const g: number = Number("0x" + this.hexa.y);
-		const b: number = Number("0x" + this.hexa.z);
-
-		const a: number = this.hexa.a ? Number((Number("0x" + this.hexa.a) / 255).toFixed(2)) : 1;
-
-		this.rgba = { r, g, b, a };
+		this.rgba = {
+			r: toB16Ch(this.hexa.x),
+			g: toB16Ch(this.hexa.y),
+			b: toB16Ch(this.hexa.z),
+			a: toB10Alpha(toB16Ch(this.hexa.a!)),
+		};
 
 		return this;
 	}
 
 	private rgbToHsl(): Color {
-		const r: number = this.rgba.r / 255;
-		const g: number = this.rgba.g / 255;
-		const b: number = this.rgba.b / 255;
-		const a: number = this.rgba.a as number;
-
-		let min: number = Math.min(r, g, b), max: number = Math.max(r, g, b), d: number = max - min, h: number = 0,
-			s: number = 0, l: number = (max + min) / 2;
-
-		if (d === 0) h = s = 0; else {
-			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-			switch (max) {
-				case r:
-					h = (g - b) / d + (g < b ? 6 : 0);
-					break;
-				case g:
-					h = (b - r) / d + 2;
-					break;
-				case b:
-					h = (r - g) / d + 4;
-					break;
-			}
-
-			h = Math.round(h * 60);
-			if (h < 0) h += 360;
-		}
-
-		this.hsla = { h, s: Number((s * 100).toFixed(1)), l: Number((l * 100).toFixed(1)), a };
+		this.hsla = rgbToHsl(this.rgba.r, this.rgba.g, this.rgba.b, this.rgba.a!);
 
 		return this;
 	}
 
 	private hslToRgb(): Color {
-		const h: number = this.hsla.h;
-		const s: number = this.hsla.s / 100;
-		const l: number = this.hsla.l / 100;
-		const a: number = this.hsla.a as number;
-
-		let c: number = (1 - Math.abs(2 * l - 1)) * s, x: number = c * (1 - Math.abs((h / 60) % 2 - 1)),
-			m: number = l - c / 2, r: number = 0, g: number = 0,
-			b: number = 0;
-
-		if (0 <= h && h < 60) {
-			r = c;
-			g = x;
-			b = 0;
-		} else if (60 <= h && h < 120) {
-			r = x;
-			g = c;
-			b = 0;
-		} else if (120 <= h && h < 180) {
-			r = 0;
-			g = c;
-			b = x;
-		} else if (180 <= h && h < 240) {
-			r = 0;
-			g = x;
-			b = c;
-		} else if (240 <= h && h < 300) {
-			r = x;
-			g = 0;
-			b = c;
-		} else if (300 <= h && h < 360) {
-			r = c;
-			g = 0;
-			b = x;
-		}
-
-		r = Math.round((r + m) * 255);
-		g = Math.round((g + m) * 255);
-		b = Math.round((b + m) * 255);
-
-		this.rgba = { r, g, b, a };
+		this.rgba = hslToRgb(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a!);
 
 		return this;
 	}
