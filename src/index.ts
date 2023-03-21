@@ -13,10 +13,14 @@ import {
 import { random, safeAlpha, safeHue, safePct, safeRgb } from "./utils";
 import { colorNamesJson } from "./consts";
 import {
+	blenderCb,
+	colorChannelMixer,
 	hslToRgb,
 	rgbDistance,
 	rgbToHsl,
-	separableBlend,
+	stringToHex,
+	stringToHsl,
+	stringToRgb,
 	toB10Alpha,
 	toB16Ch,
 	toB255Alpha,
@@ -191,7 +195,11 @@ export class Color {
 		const sourceC: Color = new Color().base(source);
 		const refC: Color = new Color().base(ref);
 		const a: number = Number((sourceC.rgba.a! + refC.rgba.a! - sourceC.rgba.a! * refC.rgba.a!).toFixed(2));
-		const rgb: RGB = new Color().blenderCb(sourceC, refC, mode);
+		const rgb: RGB = blenderCb(
+			[sourceC.rgba.r, sourceC.rgba.g, sourceC.rgba.b],
+			[refC.rgba.r, refC.rgba.g, refC.rgba.b],
+			mode
+		);
 
 		return new Color().rgb(rgb.r, rgb.g, rgb.b, a);
 	}
@@ -355,9 +363,9 @@ export class Color {
 	public mix(c: Color, percentage: number = 50): Color {
 		percentage = safePct(percentage) / 100;
 
-		const r: number = Math.round(this.colorChannelMixer(c.rgba.r, this.rgba.r, percentage));
-		const g: number = Math.round(this.colorChannelMixer(c.rgba.g, this.rgba.g, percentage));
-		const b: number = Math.round(this.colorChannelMixer(c.rgba.b, this.rgba.b, percentage));
+		const r: number = Math.round(colorChannelMixer(c.rgba.r, this.rgba.r, percentage));
+		const g: number = Math.round(colorChannelMixer(c.rgba.g, this.rgba.g, percentage));
+		const b: number = Math.round(colorChannelMixer(c.rgba.b, this.rgba.b, percentage));
 
 		this.rgb(r, g, b);
 
@@ -610,20 +618,6 @@ export class Color {
 		return [base, ...hue.map((h: number) => new Color().fromHsl(base.toHslObj()).rotate(h))];
 	}
 
-	private blenderCb(source: Color, ref: Color, mode: BlendMode): RGB {
-		const r: number = separableBlend(mode, source.rgba.r, ref.rgba.r);
-		const g: number = separableBlend(mode, source.rgba.g, ref.rgba.g);
-		const b: number = separableBlend(mode, source.rgba.b, ref.rgba.b);
-
-		return { r, g, b };
-	}
-
-	private colorChannelMixer(colorChannelA: number, colorChannelB: number, percentage: number): number {
-		const channelA: number = colorChannelA * percentage;
-		const channelB: number = colorChannelB * (1 - percentage);
-		return channelA + channelB;
-	}
-
 	private fromRgb(rgb: RGB): Color {
 		this.rgba = {
 			r: safeRgb(rgb.r),
@@ -636,24 +630,8 @@ export class Color {
 	}
 
 	private fromRgbString(c: string, alpha: boolean): Color {
-		const slice: number = alpha ? 5 : 4;
-		const sep: string = c.indexOf(",") > -1 ? "," : " ";
-		const rgba: string[] = c.slice(slice).split(")")[0].split(sep);
-
-		if (rgba.indexOf("/") > -1) rgba.splice(3, 1);
-
-		for (let i: number = 0; i < rgba.length; i++) {
-			const r: string = rgba[i];
-
-			if (r.indexOf("%") > -1) {
-				const p: number = Number(r.replace("%", "")) / 100;
-				if (Number(i) < 3) rgba[i] = String(Math.round(p * 255));
-				else rgba[i] = String(p);
-			} else {
-				if (Number(i) > 2) rgba[i] = r;
-			}
-		}
-		this.rgb(Number(rgba[0]), Number(rgba[1]), Number(rgba[2]), rgba[3] ? Number(rgba[3]) : 1);
+		const rgba: RGB = stringToRgb(c, alpha);
+		this.rgb(rgba.r, rgba.g, rgba.b, rgba.a);
 
 		return this;
 	}
@@ -670,59 +648,15 @@ export class Color {
 	}
 
 	private fromHslString(c: string, alpha: boolean): Color {
-		const slice: number = alpha ? 5 : 4;
-		const sep: string = c.indexOf(",") > -1 ? "," : " ";
-		const hsla: string[] = c.slice(slice).split(")")[0].split(sep);
+		const hsla: HSL = stringToHsl(c, alpha);
 
-		if (hsla.indexOf("/") > -1) hsla.splice(3, 1);
-
-		let h: string = hsla[0],
-			s: string = hsla[1].replace("%", ""),
-			l: string = hsla[2].replace("%", ""),
-			a: string = alpha ? hsla[3] : "1";
-
-		if (a.indexOf("%") > -1) {
-			a = String(Number(a.replace("%", "")) / 100);
-		}
-
-		if (h.indexOf("deg") > -1) h = h.replace("deg", "");
-		else if (h.indexOf("rad") > -1) h = String(Math.round(Number(h.replace("rad", "")) * (180 / Math.PI)));
-		else if (h.indexOf("turn") > -1) h = String(Math.round(Number(h.replace("turn", "")) * 360));
-
-		this.hsl(Number(h), Number(s), Number(l), Number(a));
+		this.hsl(hsla.h, hsla.s, hsla.l, hsla.a);
 
 		return this;
 	}
 
 	private fromHex(hex: string): Color {
-		const len: number = hex.length;
-		let x: string = "00", y: string = "00", z: string = "00", a: string = "ff";
-
-		if (len === 3 || len === 4) {
-			const result: RegExpExecArray | null = /^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
-			if (result) {
-				x = result[1] + result[1];
-				y = result[2] + result[2];
-				z = result[3] + result[3];
-			}
-		} else if (len === 6 || len === 7) {
-			const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-			if (result) {
-				x = result[1];
-				y = result[2];
-				z = result[3];
-			}
-		} else if (len === 8 || len === 9) {
-			const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-			if (result) {
-				x = result[1];
-				y = result[2];
-				z = result[3];
-				a = result[4];
-			}
-		}
-
-		this.hexa = { x, y, z, a };
+		this.hexa = stringToHex(hex);
 
 		return this;
 	}

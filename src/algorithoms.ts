@@ -1,4 +1,4 @@
-import { BlendMode, HSL, RGB } from "./types";
+import { BlendMode, HEX, HSL, RGB } from "./types";
 import { modeMapping, safeAlpha, safeHex, safeRgb } from "./utils";
 
 export const normal = (source: number, ref: number): number => ref + source * 0;
@@ -63,8 +63,8 @@ export const rgbToHsl = (r: number, g: number, b: number, a: number): HSL => {
 		if (h < 0) h += 360;
 	}
 
-	return {h, s: Math.round(s * 100), l: Math.round(l * 100), a};
-}
+	return { h, s: Math.round(s * 100), l: Math.round(l * 100), a };
+};
 
 export const hslToRgb = (h: number, s: number, l: number, a: number): RGB => {
 	s = s / 100;
@@ -102,4 +102,94 @@ export const hslToRgb = (h: number, s: number, l: number, a: number): RGB => {
 	}
 
 	return { r: toB255((r + m)), g: toB255((g + m)), b: toB255((b + m)), a };
+};
+
+export const stringToRgb = (c: string, alpha: boolean): RGB => {
+	const slice: number = alpha ? 5 : 4;
+	const sep: string = c.indexOf(",") > -1 ? "," : " ";
+	const rgba: string[] = c.slice(slice).split(")")[0].split(sep);
+
+	if (rgba.indexOf("/") > -1) rgba.splice(3, 1);
+
+	for (let i: number = 0; i < rgba.length; i++) {
+		const r: string = rgba[i];
+
+		if (r.indexOf("%") > -1) {
+			const p: number = Number(r.replace("%", "")) / 100;
+			if (i < 3) rgba[i] = String(Math.round(p * 255));
+			else rgba[i] = String(p);
+		} else {
+			if (i > 2) rgba[i] = r;
+		}
+	}
+
+	return { r: Number(rgba[0]), g: Number(rgba[1]), b: Number(rgba[2]), a: rgba[3] ? Number(rgba[3]) : 1 };
+};
+
+export const stringToHsl = (c: string, alpha: boolean): HSL => {
+	const slice: number = alpha ? 5 : 4;
+	const sep: string = c.indexOf(",") > -1 ? "," : " ";
+	const hsla: string[] = c.slice(slice).split(")")[0].split(sep);
+
+	if (hsla.indexOf("/") > -1) hsla.splice(3, 1);
+
+	let h: string = hsla[0],
+		s: string = hsla[1].replace("%", ""),
+		l: string = hsla[2].replace("%", ""),
+		a: string = alpha ? hsla[3] : "1";
+
+	if (a.indexOf("%") > -1) {
+		a = String(Number(a.replace("%", "")) / 100);
+	}
+
+	if (h.indexOf("deg") > -1) h = h.replace("deg", "");
+	else if (h.indexOf("rad") > -1) h = String(Math.round(Number(h.replace("rad", "")) * (180 / Math.PI)));
+	else if (h.indexOf("turn") > -1) h = String(Math.round(Number(h.replace("turn", "")) * 360));
+
+	return { h: Number(hsla[0]), s: Number(hsla[1]), l: Number(hsla[2]), a: hsla[3] ? Number(hsla[3]) : 1 };
+};
+
+export const stringToHex = (hex: string): HEX => {
+	const len: number = hex.length;
+	let x: string = "00", y: string = "00", z: string = "00", a: string = "ff";
+
+	if (len === 3 || len === 4) {
+		const result: RegExpExecArray | null = /^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
+		if (result) {
+			x = result[1] + result[1];
+			y = result[2] + result[2];
+			z = result[3] + result[3];
+		}
+	} else if (len === 6 || len === 7) {
+		const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		if (result) {
+			x = result[1];
+			y = result[2];
+			z = result[3];
+		}
+	} else if (len === 8 || len === 9) {
+		const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		if (result) {
+			x = result[1];
+			y = result[2];
+			z = result[3];
+			a = result[4];
+		}
+	}
+
+	return { x, y, z, a };
+};
+
+export const colorChannelMixer = (colorChannelA: number, colorChannelB: number, percentage: number): number => {
+	const channelA: number = colorChannelA * percentage;
+	const channelB: number = colorChannelB * (1 - percentage);
+	return channelA + channelB;
+}
+
+export const blenderCb = (source: [number, number, number], ref: [number, number, number], mode: BlendMode): RGB => {
+	const r: number = separableBlend(mode, source[0], ref[0]);
+	const g: number = separableBlend(mode, source[1], ref[1]);
+	const b: number = separableBlend(mode, source[2], ref[0]);
+
+	return { r, g, b };
 }
