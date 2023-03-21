@@ -10,7 +10,9 @@ import {
 	RGB,
 	ValidationResult,
 } from "./types";
-import { colorNamesJson, random, rgbDistance, safeAlpha, safeHue, safePct, safeRgb, separableBlend } from "./utils";
+import { random, safeAlpha, safeHue, safePct, safeRgb } from "./utils";
+import { colorNamesJson } from "./consts";
+import { rgbDistance, separableBlend } from "./algorithoms";
 
 export class Color {
 	private rgba: RGB = { r: 0, g: 0, b: 0, a: 1 };
