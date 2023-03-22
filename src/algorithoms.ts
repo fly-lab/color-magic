@@ -146,7 +146,7 @@ export const stringToHsl = (c: string, alpha: boolean): HSL => {
 	else if (h.indexOf("rad") > -1) h = String(Math.round(Number(h.replace("rad", "")) * (180 / Math.PI)));
 	else if (h.indexOf("turn") > -1) h = String(Math.round(Number(h.replace("turn", "")) * 360));
 
-	return { h: Number(hsla[0]), s: Number(hsla[1]), l: Number(hsla[2]), a: hsla[3] ? Number(hsla[3]) : 1 };
+	return { h: Number(h), s: Number(s), l: Number(l), a: Number(a) };
 };
 
 export const stringToHex = (hex: string): HEX => {
