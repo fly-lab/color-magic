@@ -6,12 +6,7 @@
 	"main": "dist/index.js",
 	"typings": "dist/index.d.ts",
 	"files": [
-		"dist/*",
-		".media/*",
-		"package.json",
-		"tsconfig.json",
-		".gitignore",
-		"README.md"
+		"dist/*"
 	],
 	"engines": {
 		"node": ">=18"
