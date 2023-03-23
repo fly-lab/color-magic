@@ -553,7 +553,7 @@ export class Color {
 	}
 
 	public validateName(c: NamedColor): ValidationResult {
-		const method = "css_name";
+		const method: ColorMethod = "css_name";
 
 		if (Object.keys(this.colorNames).includes(c)) {
 			return [true, { method, alpha: true }];
