@@ -1,5 +1,5 @@
 import { BlendMode, HEX, HSL, RGB } from "./types";
-import { modeMapping, safeAlpha, safeHex, safeRgb } from "./utils";
+import {modeMapping, safeAlpha, safeHex, safePct, safeRgb} from "./utils";
 
 export const normal = (source: number, ref: number): number => ref + source * 0;
 export const multiply = (source: number, ref: number): number => source * ref;
@@ -108,15 +108,15 @@ export const hslToRgb = (h: number, s: number, l: number, a: number): RGB => {
 export const stringToRgb = (c: string, alpha: boolean): RGB => {
 	const slice: number = alpha ? 5 : 4;
 	const sep: string = c.indexOf(",") > -1 ? "," : " ";
-	const rgba: string[] = c.slice(slice).split(")")[0]!.split(sep);
+	const rgba: string[] = c.slice(slice).split(")")[0].split(sep);
 
 	if (rgba.indexOf("/") > -1) rgba.splice(3, 1);
 
 	for (let i: number = 0; i < rgba.length; i++) {
-		const r: string = rgba[i]!;
+		const r: string = rgba[i];
 
 		if (r.indexOf("%") > -1) {
-			const p: number = Number(r.replace("%", "")) / 100;
+			const p: number = safePct(Number(r.replace("%", ""))) / 100;
 			if (i < 3) rgba[i] = String(Math.round(p * 255));
 			else rgba[i] = String(p);
 		} else {
@@ -130,17 +130,17 @@ export const stringToRgb = (c: string, alpha: boolean): RGB => {
 export const stringToHsl = (c: string, alpha: boolean): HSL => {
 	const slice: number = alpha ? 5 : 4;
 	const sep: string = c.indexOf(",") > -1 ? "," : " ";
-	const hsla: string[] = c.slice(slice).split(")")[0]!.split(sep);
+	const hsla: string[] = c.slice(slice).split(")")[0].split(sep);
 
 	if (hsla.indexOf("/") > -1) hsla.splice(3, 1);
 
-	let h: string = hsla[0]!,
-		s: string = hsla[1]!.replace("%", ""),
-		l: string = hsla[2]!.replace("%", ""),
-		a: string = alpha ? hsla[3]! : "1";
+	let h: string = hsla[0],
+		s: string = hsla[1].replace("%", ""),
+		l: string = hsla[2].replace("%", ""),
+		a: string = alpha ? hsla[3] : "1";
 
 	if (a.indexOf("%") > -1) {
-		a = String(Number(a.replace("%", "")) / 100);
+		a = String(safePct(Number(a.replace("%", ""))) / 100);
 	}
 
 	if (h.indexOf("deg") > -1) h = h.replace("deg", "");
@@ -155,26 +155,26 @@ export const stringToHex = (hex: string): HEX => {
 	let x: string = "00", y: string = "00", z: string = "00", a: string = "ff";
 
 	if (len === 3 || len === 4) {
-		const result: RegExpExecArray | null = /^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
+		const result: RegExpExecArray | null = /^#?([a-f\d])([a-f\d])([a-f\d])$/i.exec(hex);
 		if (result) {
-			x = result[1]! + result[1]!;
-			y = result[2]! + result[2]!;
-			z = result[3]! + result[3]!;
+			x = result[1] + result[1];
+			y = result[2] + result[2];
+			z = result[3] + result[3];
 		}
 	} else if (len === 6 || len === 7) {
 		const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 		if (result) {
-			x = result[1]!;
-			y = result[2]!;
-			z = result[3]!;
+			x = result[1];
+			y = result[2];
+			z = result[3];
 		}
 	} else if (len === 8 || len === 9) {
 		const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 		if (result) {
-			x = result[1]!;
-			y = result[2]!;
-			z = result[3]!;
-			a = result[4]!;
+			x = result[1];
+			y = result[2];
+			z = result[3];
+			a = result[4];
 		}
 	}
 
@@ -187,10 +187,13 @@ export const colorChannelMixer = (colorChannelA: number, colorChannelB: number, 
 	return channelA + channelB;
 }
 
-export const blenderCb = (source: [number, number, number], ref: [number, number, number], mode: BlendMode): RGB => {
-	const r: number = separableBlend(mode, source[0], ref[0]);
-	const g: number = separableBlend(mode, source[1], ref[1]);
-	const b: number = separableBlend(mode, source[2], ref[0]);
+export const blendAlpha = (s: number, r: number): number => Number((s + r - s * r).toFixed(2))
 
-	return { r, g, b };
+export const blenderCb = (source: RGB, ref: RGB, mode: BlendMode): RGB => {
+	const r: number = separableBlend(mode, source.r, ref.r);
+	const g: number = separableBlend(mode, source.g, ref.g);
+	const b: number = separableBlend(mode, source.b, ref.b);
+	const a: number = blendAlpha(source.a, ref.a);
+
+	return { r, g, b, a };
 }

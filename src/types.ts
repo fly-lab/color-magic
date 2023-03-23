@@ -4,21 +4,21 @@ export interface RGB {
 	r: number;
 	g: number;
 	b: number;
-	a?: number;
+	a: number;
 }
 
 export interface HSL {
 	h: number;
 	s: number;
 	l: number;
-	a?: number;
+	a: number;
 }
 
 export interface HEX {
 	x: string;
 	y: string;
 	z: string;
-	a?: string;
+	a: string;
 }
 
 export type NamedColor =

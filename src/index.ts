@@ -49,7 +49,7 @@ export class Color {
 		const col: string = new Color().base(c).toHex(false);
 		const arr: [string, string][] = Object.entries(new Color().colorNames);
 		const index: number = arr.findIndex(c => c[1] === col);
-		return index > -1 ? arr[index]![0] : col;
+		return index > -1 ? arr[index][0] : col;
 	}
 
 	public static validate(c: string | NamedColor): ValidationResult {
@@ -194,14 +194,9 @@ export class Color {
 	public static blend(source: PossibleColors, ref: PossibleColors, mode: BlendMode = "normal"): Color {
 		const sourceC: Color = new Color().base(source);
 		const refC: Color = new Color().base(ref);
-		const a: number = Number((sourceC.rgba.a! + refC.rgba.a! - sourceC.rgba.a! * refC.rgba.a!).toFixed(2));
-		const rgb: RGB = blenderCb(
-			[sourceC.rgba.r, sourceC.rgba.g, sourceC.rgba.b],
-			[refC.rgba.r, refC.rgba.g, refC.rgba.b],
-			mode
-		);
+		const rgb: RGB = blenderCb(sourceC.toRgbObj(), refC.toRgbObj(), mode);
 
-		return new Color().rgb(rgb.r, rgb.g, rgb.b, a);
+		return new Color().rgb(rgb.r, rgb.g, rgb.b, rgb.a);
 	}
 
 	public getName(): PossibleColorStrings {
@@ -246,9 +241,9 @@ export class Color {
 			if (valid_c[1].method === "hex") {
 				this.hex(c);
 			} else if (valid_c[1].method === "hsl") {
-				this.fromHslString(c, valid_c[1].alpha!);
+				this.fromHslString(c, valid_c[1].alpha);
 			} else if (valid_c[1].method === "rgb") {
-				this.fromRgbString(c, valid_c[1].alpha!);
+				this.fromRgbString(c, valid_c[1].alpha);
 			} else if (valid_c[1].method === "css_name") {
 				this.name(c as NamedColor);
 			}
@@ -347,14 +342,14 @@ export class Color {
 	}
 
 	public fade(value: number): Color {
-		const v: number = this.hsla.a! * (1 - (safePct(value) / 100));
+		const v: number = this.hsla.a * (1 - (safePct(value) / 100));
 		this.hsl(this.hsla.h, this.hsla.s, this.hsla.l, v);
 
 		return this;
 	}
 
 	public brighten(value: number): Color {
-		const v: number = this.hsla.a! * (1 + (safePct(value) / 100));
+		const v: number = this.hsla.a * (1 + (safePct(value) / 100));
 		this.hsl(this.hsla.h, this.hsla.s, this.hsla.l, Number(v.toFixed(2)));
 
 		return this;
@@ -516,13 +511,13 @@ export class Color {
 
 	public toRgb(withAlpha: boolean = true, withPct: boolean = false): string {
 		let r: number = this.rgba.r, g: number = this.rgba.g, b: number = this.rgba.b,
-			a: number = this.rgba.a as number;
+			a: number = this.rgba.a;
 
 		if (withPct) {
 			r = Number((r / 255 * 100).toFixed(1));
 			g = Number((g / 255 * 100).toFixed(1));
 			b = Number((b / 255 * 100).toFixed(1));
-			a = Number((a! * 100).toFixed(1));
+			a = Number((a * 100).toFixed(1));
 
 			if (withAlpha) return `rgba(${r}%, ${g}%, ${b}%, ${a}%)`; else return `rgb(${r}%, ${g}%, ${b}%)`;
 		}
@@ -623,7 +618,7 @@ export class Color {
 			r: safeRgb(rgb.r),
 			g: safeRgb(rgb.g),
 			b: safeRgb(rgb.b),
-			a: rgb.a !== undefined ? safeAlpha(rgb.a) : this.rgba.a!,
+			a: safeAlpha(rgb.a),
 		};
 
 		return this;
@@ -641,7 +636,7 @@ export class Color {
 			h: safeHue(hsl.h),
 			s: safePct(hsl.s),
 			l: safePct(hsl.l),
-			a: hsl.a !== undefined ? safeAlpha(hsl.a) : this.hsla.a!,
+			a: safeAlpha(hsl.a),
 		};
 
 		return this;
@@ -666,7 +661,7 @@ export class Color {
 			x: toHexCh(this.rgba.r),
 			y: toHexCh(this.rgba.g),
 			z: toHexCh(this.rgba.b),
-			a: toHexCh(toB255Alpha(this.rgba.a!)),
+			a: toHexCh(toB255Alpha(this.rgba.a)),
 		};
 
 		return this;
@@ -677,20 +672,20 @@ export class Color {
 			r: toB16Ch(this.hexa.x),
 			g: toB16Ch(this.hexa.y),
 			b: toB16Ch(this.hexa.z),
-			a: toB10Alpha(toB16Ch(this.hexa.a!)),
+			a: toB10Alpha(toB16Ch(this.hexa.a)),
 		};
 
 		return this;
 	}
 
 	private rgbToHsl(): Color {
-		this.hsla = rgbToHsl(this.rgba.r, this.rgba.g, this.rgba.b, this.rgba.a!);
+		this.hsla = rgbToHsl(this.rgba.r, this.rgba.g, this.rgba.b, this.rgba.a);
 
 		return this;
 	}
 
 	private hslToRgb(): Color {
-		this.rgba = hslToRgb(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a!);
+		this.rgba = hslToRgb(this.hsla.h, this.hsla.s, this.hsla.l, this.hsla.a);
 
 		return this;
 	}
