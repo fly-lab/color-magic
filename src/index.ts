@@ -49,7 +49,7 @@ export class Color {
 		const col: string = new Color().base(c).toHex(false);
 		const arr: [string, string][] = Object.entries(new Color().colorNames);
 		const index: number = arr.findIndex(c => c[1] === col);
-		return index > -1 ? arr[index][0] : col;
+		return index > -1 ? arr[index]![0] : col;
 	}
 
 	public static validate(c: string | NamedColor): ValidationResult {
@@ -208,7 +208,7 @@ export class Color {
 		return Color.getName(this.toHex());
 	}
 
-	public rgb(r: number, g: number, b: number, a?: number): Color {
+	public rgb(r: number, g: number, b: number, a: number = 1): Color {
 		this.fromRgb({ r, g, b, a });
 		this.rgbToHsl();
 		this.rgbToHex();
@@ -216,7 +216,7 @@ export class Color {
 		return this;
 	}
 
-	public hsl(h: number, s: number, l: number, a?: number): Color {
+	public hsl(h: number, s: number, l: number, a: number = 1): Color {
 		this.fromHsl({ h, s, l, a });
 		this.hslToHex();
 		this.hslToRgb();
@@ -623,7 +623,7 @@ export class Color {
 			r: safeRgb(rgb.r),
 			g: safeRgb(rgb.g),
 			b: safeRgb(rgb.b),
-			a: rgb.a !== undefined ? safeAlpha(rgb.a) : this.rgba.a,
+			a: rgb.a !== undefined ? safeAlpha(rgb.a) : this.rgba.a!,
 		};
 
 		return this;
@@ -641,7 +641,7 @@ export class Color {
 			h: safeHue(hsl.h),
 			s: safePct(hsl.s),
 			l: safePct(hsl.l),
-			a: hsl.a !== undefined ? safeAlpha(hsl.a) : this.hsla.a,
+			a: hsl.a !== undefined ? safeAlpha(hsl.a) : this.hsla.a!,
 		};
 
 		return this;

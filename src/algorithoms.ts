@@ -49,17 +49,18 @@ export const rgbToHsl = (r: number, g: number, b: number, a: number): HSL => {
 
 		switch (max) {
 			case r:
-				h = (g - b) / d + (g < b ? 6 : 0);
+				h = ((g - b) / d) % 6;
 				break;
 			case g:
-				h = (b - r) / d + 2;
+				h = ((b - r) / d) + 2;
 				break;
 			case b:
-				h = (r - g) / d + 4;
+				h = ((r - g) / d) + 4;
 				break;
 		}
 
-		h = Math.round(h * 360);
+		h = Math.round(h * 60);
+
 		if (h < 0) h += 360;
 	}
 
@@ -107,12 +108,12 @@ export const hslToRgb = (h: number, s: number, l: number, a: number): RGB => {
 export const stringToRgb = (c: string, alpha: boolean): RGB => {
 	const slice: number = alpha ? 5 : 4;
 	const sep: string = c.indexOf(",") > -1 ? "," : " ";
-	const rgba: string[] = c.slice(slice).split(")")[0].split(sep);
+	const rgba: string[] = c.slice(slice).split(")")[0]!.split(sep);
 
 	if (rgba.indexOf("/") > -1) rgba.splice(3, 1);
 
 	for (let i: number = 0; i < rgba.length; i++) {
-		const r: string = rgba[i];
+		const r: string = rgba[i]!;
 
 		if (r.indexOf("%") > -1) {
 			const p: number = Number(r.replace("%", "")) / 100;
@@ -129,14 +130,14 @@ export const stringToRgb = (c: string, alpha: boolean): RGB => {
 export const stringToHsl = (c: string, alpha: boolean): HSL => {
 	const slice: number = alpha ? 5 : 4;
 	const sep: string = c.indexOf(",") > -1 ? "," : " ";
-	const hsla: string[] = c.slice(slice).split(")")[0].split(sep);
+	const hsla: string[] = c.slice(slice).split(")")[0]!.split(sep);
 
 	if (hsla.indexOf("/") > -1) hsla.splice(3, 1);
 
-	let h: string = hsla[0],
-		s: string = hsla[1].replace("%", ""),
-		l: string = hsla[2].replace("%", ""),
-		a: string = alpha ? hsla[3] : "1";
+	let h: string = hsla[0]!,
+		s: string = hsla[1]!.replace("%", ""),
+		l: string = hsla[2]!.replace("%", ""),
+		a: string = alpha ? hsla[3]! : "1";
 
 	if (a.indexOf("%") > -1) {
 		a = String(Number(a.replace("%", "")) / 100);
@@ -156,24 +157,24 @@ export const stringToHex = (hex: string): HEX => {
 	if (len === 3 || len === 4) {
 		const result: RegExpExecArray | null = /^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
 		if (result) {
-			x = result[1] + result[1];
-			y = result[2] + result[2];
-			z = result[3] + result[3];
+			x = result[1]! + result[1]!;
+			y = result[2]! + result[2]!;
+			z = result[3]! + result[3]!;
 		}
 	} else if (len === 6 || len === 7) {
 		const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 		if (result) {
-			x = result[1];
-			y = result[2];
-			z = result[3];
+			x = result[1]!;
+			y = result[2]!;
+			z = result[3]!;
 		}
 	} else if (len === 8 || len === 9) {
 		const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 		if (result) {
-			x = result[1];
-			y = result[2];
-			z = result[3];
-			a = result[4];
+			x = result[1]!;
+			y = result[2]!;
+			z = result[3]!;
+			a = result[4]!;
 		}
 	}
 
