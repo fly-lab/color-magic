@@ -476,7 +476,7 @@ export class Color {
 		if (Object.keys(this.colorNames).includes(c)) {
 			return [true, { method, alpha: true }];
 		} else {
-			return [false, { method: undefined }];
+			return [false, { method: undefined, alpha: true }];
 		}
 	}
 
@@ -490,7 +490,7 @@ export class Color {
 		} else if (expAlpha.test(c)) {
 			return [true, { method, alpha: true }];
 		} else {
-			return [false, { method: undefined }];
+			return [false, { method: undefined, alpha: true }];
 		}
 	}
 
@@ -504,7 +504,7 @@ export class Color {
 		} else if (expAlpha.test(c)) {
 			return [true, { method, alpha: true }];
 		} else {
-			return [false, { method: undefined }];
+			return [false, { method: undefined, alpha: true }];
 		}
 	}
 
@@ -518,7 +518,7 @@ export class Color {
 		} else if (expAlpha.test(c)) {
 			return [true, { method, alpha: true }];
 		} else {
-			return [false, { method: undefined }];
+			return [false, { method: undefined, alpha: true }];
 		}
 	}
 

@@ -181,7 +181,7 @@ export type PossibleColorStrings = NamedColor | string;
 export type ColorMethod = "hsl" | "rgb" | "hex" | "css_name" | undefined;
 
 export type ValidationResult = [boolean, {
-	method: ColorMethod; alpha?: boolean;
+	method: ColorMethod; alpha: boolean;
 }]
 
 export type BlenderCb = (source: Color, ref: Color, mode: BlendMode) => Color;
