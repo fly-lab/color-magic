@@ -201,3 +201,5 @@ export type BlendMode =
 	| "burn"
 	| "hard"
 	| "soft";
+
+export type TempAlgorithm = "tanner_helland" | "curve_fitting";
