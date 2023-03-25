@@ -1,7 +1,7 @@
 # Color Magic
 
 <!-- AUTO-GENERATED-CONTENT:START (VERSIONBADGE) -->
-[![npm](https://img.shields.io/badge/npm-v5.2.0-green.svg)](https://www.npmjs.com/package/@fly-lab/color-magic)
+[![npm](https://img.shields.io/badge/npm-v5.6.0-green.svg)](https://www.npmjs.com/package/@fly-lab/color-magic)
 <!-- AUTO-GENERATED-CONTENT:END -->
 
 <p align="center">

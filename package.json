@@ -1,5 +1,5 @@
 {
-	"version": "5.5.0",
+	"version": "5.6.0",
 	"name": "@fly-lab/color-magic",
 	"description": "Color magic is a fully typed JavaScript color manipulation library with zero dependency. You can generate, manipulate and access colors in popular color formats.",
 	"author": "DHN Chandan",
