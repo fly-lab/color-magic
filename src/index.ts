@@ -7,10 +7,11 @@ import {
 	NamedColor,
 	PossibleColors,
 	PossibleColorStrings,
-	RGB, TempAlgorithm,
+	RGB,
+	TempAlgorithm,
 	ValidationResult,
 } from "./types";
-import { random, safeAlpha, safeHue, safePct, safeRgb } from "./utils";
+import { random, safeAlpha, safeHue, safePct, safeRgb, toB10Alpha, toB16Ch, toB255Alpha, toHexCh } from "./utils";
 import { colorNamesJson } from "./consts";
 import {
 	blenderCb,
@@ -20,11 +21,8 @@ import {
 	rgbToHsl,
 	stringToHex,
 	stringToHsl,
-	stringToRgb, tempToRgb,
-	toB10Alpha,
-	toB16Ch,
-	toB255Alpha,
-	toHexCh,
+	stringToRgb,
+	tempToRgb,
 } from "./algorithoms";
 
 export class Color {
@@ -48,7 +46,7 @@ export class Color {
 	public static getName(c: PossibleColors): PossibleColorStrings {
 		const col: string = new Color().base(c).toHex(false);
 		const arr: [string, string][] = Object.entries(new Color().colorNames);
-		const index: number = arr.findIndex(c => c[1] === col);
+		const index: number = arr.findIndex((c) => c[1] === col);
 		return index > -1 ? arr[index][0] : col;
 	}
 
@@ -91,7 +89,8 @@ export class Color {
 
 	public static toTemperature(c: PossibleColors): number {
 		const base: Color = new Color().base(c);
-		let temperature: number = 0, testRGB: Color;
+		let temperature: number = 0,
+			testRGB: Color;
 		const epsilon: number = 0.4;
 		let minTemperature: number = 1000;
 		let maxTemperature: number = 40000;
@@ -99,7 +98,7 @@ export class Color {
 		while (maxTemperature - minTemperature > epsilon) {
 			temperature = (maxTemperature + minTemperature) / 2;
 			testRGB = this.temperature(temperature);
-			if ((testRGB.toRgbObj().b / testRGB.toRgbObj().r) >= (base.toRgbObj().b / base.toRgbObj().r)) {
+			if (testRGB.toRgbObj().b / testRGB.toRgbObj().r >= base.toRgbObj().b / base.toRgbObj().r) {
 				maxTemperature = temperature;
 			} else {
 				minTemperature = temperature;
@@ -220,28 +219,28 @@ export class Color {
 	}
 
 	public lighten(value: number): Color {
-		const l: number = this.hsla.l * (1 + (safePct(value) / 100));
+		const l: number = this.hsla.l * (1 + safePct(value) / 100);
 		this.lightness(Number(l.toFixed(1)));
 
 		return this;
 	}
 
 	public darken(value: number): Color {
-		const l: number = this.hsla.l * (1 - (safePct(value) / 100));
+		const l: number = this.hsla.l * (1 - safePct(value) / 100);
 		this.lightness(Number(l.toFixed(1)));
 
 		return this;
 	}
 
 	public saturate(value: number): Color {
-		const s: number = this.hsla.s * (1 + (safePct(value) / 100));
+		const s: number = this.hsla.s * (1 + safePct(value) / 100);
 		this.saturation(Number(s.toFixed(1)));
 
 		return this;
 	}
 
 	public desaturate(value: number): Color {
-		const s: number = this.hsla.s * (1 - (safePct(value) / 100));
+		const s: number = this.hsla.s * (1 - safePct(value) / 100);
 		this.saturation(Number(s.toFixed(1)));
 
 		return this;
@@ -260,14 +259,14 @@ export class Color {
 	}
 
 	public fade(value: number): Color {
-		const v: number = this.hsla.a * (1 - (safePct(value) / 100));
+		const v: number = this.hsla.a * (1 - safePct(value) / 100);
 		this.hsl(this.hsla.h, this.hsla.s, this.hsla.l, v);
 
 		return this;
 	}
 
 	public brighten(value: number): Color {
-		const v: number = this.hsla.a * (1 + (safePct(value) / 100));
+		const v: number = this.hsla.a * (1 + safePct(value) / 100);
 		this.hsl(this.hsla.h, this.hsla.s, this.hsla.l, Number(v.toFixed(2)));
 
 		return this;
@@ -315,7 +314,7 @@ export class Color {
 	}
 
 	public isDark(): boolean {
-		return ((this.rgba.r * 2126 + this.rgba.g * 7152 + this.rgba.b * 722) / 10000) < 128;
+		return (this.rgba.r * 2126 + this.rgba.g * 7152 + this.rgba.b * 722) / 10000 < 128;
 	}
 
 	public isLight(): boolean {
@@ -372,16 +371,30 @@ export class Color {
 	}
 
 	public swatch(band: 3 | 5 | 7 | 9 = 5): Color[] {
-		const h: number = this.hsla.h, s: number = this.hsla.s, l: number = this.hsla.l,
+		const h: number = this.hsla.h,
+			s: number = this.hsla.s,
+			l: number = this.hsla.l,
 			a: number = this.hsla.a as number;
 
 		const colors: Color[] = [this];
 
 		for (let i: number = 1; i < band; i++) {
 			if (i % 2 === 0) {
-				colors.push(new Color().hsl(h, s, l, a).rotate(10 * i).desaturate(5 * i).darken(2.5 * i));
+				colors.push(
+					new Color()
+						.hsl(h, s, l, a)
+						.rotate(10 * i)
+						.desaturate(5 * i)
+						.darken(2.5 * i),
+				);
 			} else {
-				colors.unshift(new Color().hsl(h, s, l, a).rotate(-10 * i).saturate(5 * i).lighten(2.5 * i));
+				colors.unshift(
+					new Color()
+						.hsl(h, s, l, a)
+						.rotate(-10 * i)
+						.saturate(5 * i)
+						.lighten(2.5 * i),
+				);
 			}
 		}
 
@@ -389,16 +402,30 @@ export class Color {
 	}
 
 	public randomSwatch(band: 3 | 5 | 7 | 9 = 5): Color[] {
-		const h: number = this.hsla.h, s: number = this.hsla.s, l: number = this.hsla.l,
+		const h: number = this.hsla.h,
+			s: number = this.hsla.s,
+			l: number = this.hsla.l,
 			a: number = this.hsla.a as number;
 
 		const colors: Color[] = [this];
 
 		for (let i: number = 1; i < band; i++) {
 			if (i % 2 === 0) {
-				colors.push(new Color().hsl(h, s, l, a).rotate(random() * i * 10).desaturate(random() * i * 5).darken(random() * i * 5));
+				colors.push(
+					new Color()
+						.hsl(h, s, l, a)
+						.rotate(random() * i * 10)
+						.desaturate(random() * i * 5)
+						.darken(random() * i * 5),
+				);
 			} else {
-				colors.unshift(new Color().hsl(h, s, l, a).rotate(random() * i * 10).saturate(random() * i * 5).lighten(random() * i * 5));
+				colors.unshift(
+					new Color()
+						.hsl(h, s, l, a)
+						.rotate(random() * i * 10)
+						.saturate(random() * i * 5)
+						.lighten(random() * i * 5),
+				);
 			}
 		}
 
@@ -407,7 +434,9 @@ export class Color {
 
 	public colors(): object {
 		return {
-			rgb: this.rgba, hsl: this.hsla, hex: this.hexa,
+			rgb: this.rgba,
+			hsl: this.hsla,
+			hex: this.hexa,
 		};
 	}
 
@@ -428,33 +457,43 @@ export class Color {
 	}
 
 	public toRgb(withAlpha: boolean = true, withPct: boolean = false): string {
-		let r: number = this.rgba.r, g: number = this.rgba.g, b: number = this.rgba.b,
+		let r: number = this.rgba.r,
+			g: number = this.rgba.g,
+			b: number = this.rgba.b,
 			a: number = this.rgba.a;
 
 		if (withPct) {
-			r = Number((r / 255 * 100).toFixed(1));
-			g = Number((g / 255 * 100).toFixed(1));
-			b = Number((b / 255 * 100).toFixed(1));
+			r = Number(((r / 255) * 100).toFixed(1));
+			g = Number(((g / 255) * 100).toFixed(1));
+			b = Number(((b / 255) * 100).toFixed(1));
 			a = Number((a * 100).toFixed(1));
 
-			if (withAlpha) return `rgba(${r}%, ${g}%, ${b}%, ${a}%)`; else return `rgb(${r}%, ${g}%, ${b}%)`;
+			if (withAlpha) return `rgba(${r}%, ${g}%, ${b}%, ${a}%)`;
+			else return `rgb(${r}%, ${g}%, ${b}%)`;
 		}
 
-		if (withAlpha) return `rgba(${r}, ${g}, ${b}, ${a})`; else return `rgb(${r}, ${g}, ${b})`;
+		if (withAlpha) return `rgba(${r}, ${g}, ${b}, ${a})`;
+		else return `rgb(${r}, ${g}, ${b})`;
 	}
 
 	public toHex(withAlpha: boolean = true): string {
-		const x: string = this.hexa.x, y: string = this.hexa.y, z: string = this.hexa.z,
+		const x: string = this.hexa.x,
+			y: string = this.hexa.y,
+			z: string = this.hexa.z,
 			a: string = this.hexa.a as string;
 
-		if (withAlpha) return `#${x}${y}${z}${a}`; else return `#${x}${y}${z}`;
+		if (withAlpha) return `#${x}${y}${z}${a}`;
+		else return `#${x}${y}${z}`;
 	}
 
 	public toHsl(withAlpha: boolean = true): string {
-		const h: number = this.hsla.h, s: number = this.hsla.s, l: number = this.hsla.l,
+		const h: number = this.hsla.h,
+			s: number = this.hsla.s,
+			l: number = this.hsla.l,
 			a: number = this.hsla.a as number;
 
-		if (withAlpha) return `hsla(${h}, ${s}%, ${l}%, ${a})`; else return `hsl(${h}, ${s}%, ${l}%)`;
+		if (withAlpha) return `hsla(${h}, ${s}%, ${l}%, ${a})`;
+		else return `hsl(${h}, ${s}%, ${l}%)`;
 	}
 
 	public validate(c: PossibleColorStrings): ValidationResult {
@@ -481,8 +520,10 @@ export class Color {
 	}
 
 	public validateRgb(c: string): ValidationResult {
-		const exp: RegExp = /^rgb\((((((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]),\s?)){2}|((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5])\s)){2})((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]))|((((([1-9]?\d(\.\d+)?)|100|(\.\d+))%,\s?){2}|((([1-9]?\d(\.\d+)?)|100|(\.\d+))%\s){2})(([1-9]?\d(\.\d+)?)|100|(\.\d+))%))\)$/i;
-		const expAlpha: RegExp = /^rgba\((((((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]),\s?)){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%,\s?){3}))|(((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5])\s){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%\s){3}))\/\s)((0?\.\d+)|[01]|(([1-9]?\d(\.\d+)?)|100|(\.\d+))%)\)$/i;
+		const exp: RegExp =
+			/^rgb\((((((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]),\s?)){2}|((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5])\s)){2})((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]))|((((([1-9]?\d(\.\d+)?)|100|(\.\d+))%,\s?){2}|((([1-9]?\d(\.\d+)?)|100|(\.\d+))%\s){2})(([1-9]?\d(\.\d+)?)|100|(\.\d+))%))\)$/i;
+		const expAlpha: RegExp =
+			/^rgba\((((((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]),\s?)){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%,\s?){3}))|(((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5])\s){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%\s){3}))\/\s)((0?\.\d+)|[01]|(([1-9]?\d(\.\d+)?)|100|(\.\d+))%)\)$/i;
 		const method: ColorMethod = "rgb";
 
 		if (exp.test(c)) {
@@ -495,8 +536,10 @@ export class Color {
 	}
 
 	public validateHsl(c: string): ValidationResult {
-		const exp: RegExp = /^hsl\(((((([12]?[1-9]?\d)|[12]0\d|(3[0-5]\d))(\.\d+)?)|(\.\d+))(deg)?|(0|0?\.\d+)turn|(([0-6](\.\d+)?)|(\.\d+))rad|360)((,\s?(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2}|(\s(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2})\)$/i;
-		const expAlpha: RegExp = /^hsla\(((((([12]?[1-9]?\d)|[12]0\d|(3[0-5]\d))(\.\d+)?)|(\.\d+))(deg)?|(0|0?\.\d+)turn|(([0-6](\.\d+)?)|(\.\d+))rad|360)(((,\s?(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2},\s?)|((\s(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2}\s\/\s))((0?\.\d+)|[01]|(([1-9]?\d(\.\d+)?)|100|(\.\d+))%)\)$/i;
+		const exp: RegExp =
+			/^hsl\(((((([12]?[1-9]?\d)|[12]0\d|(3[0-5]\d))(\.\d+)?)|(\.\d+))(deg)?|(0|0?\.\d+)turn|(([0-6](\.\d+)?)|(\.\d+))rad|360)((,\s?(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2}|(\s(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2})\)$/i;
+		const expAlpha: RegExp =
+			/^hsla\(((((([12]?[1-9]?\d)|[12]0\d|(3[0-5]\d))(\.\d+)?)|(\.\d+))(deg)?|(0|0?\.\d+)turn|(([0-6](\.\d+)?)|(\.\d+))rad|360)(((,\s?(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2},\s?)|((\s(([1-9]?\d(\.\d+)?)|100|(\.\d+))%){2}\s\/\s))((0?\.\d+)|[01]|(([1-9]?\d(\.\d+)?)|100|(\.\d+))%)\)$/i;
 		const method: ColorMethod = "hsl";
 
 		if (exp.test(c)) {

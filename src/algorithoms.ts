@@ -1,5 +1,5 @@
-import { BlendMode, HEX, HSB, HSL, LAB, RGB, TempAlgorithm, XYZ } from "./types";
-import { modeMapping, safeAlpha, safeHex, safePct, safeRgb } from "./utils";
+import {BlendMode, HEX, HSB, HSL, LAB, RGB, TempAlgorithm, XYZ} from "./types";
+import {f, hueSwitch, lerp, modeMapping, p, REF_X, REF_Y, REF_Z, safePct, safeRgb, toB10, toB255,} from "./utils";
 
 export const normal = (source: number, ref: number): number => ref + source * 0;
 export const multiply = (source: number, ref: number): number => source * ref;
@@ -26,28 +26,6 @@ export const separableBlend = (mode: BlendMode, source: number, ref: number): nu
 
 export const rgbDistance = (c1: RGB, c2: RGB): number =>
 	Math.sqrt(Math.pow(c1.r - c2.r, 2) + Math.pow(c1.g - c2.g, 2) + Math.pow(c1.b - c2.b, 2));
-
-// converts 0-255 to 00-ff
-export const toHexCh = (v: number): string => safeRgb(v).toString(16).padStart(2, "0");
-// converts decimal to 255 multiples
-export const toB255 = (v: number): number => Math.round(v * 255);
-// converts 0-1 to 0-255
-export const toB255Alpha = (v: number): number => toB255(safeAlpha(v));
-// converts decimal to 255 divisions
-export const toB10 = (v: number): number => v / 255;
-// converts 0-255 to 0-1 with 2 decimal precisions
-export const toB10Alpha = (v: number): number => Number(toB10(safeRgb(v)).toFixed(2));
-// converts 00-ff to 0-255
-export const toB16Ch = (v: string): number => parseInt(safeHex(v), 16);
-
-const hueSwitch = (p: number, q: number, t: number): number => {
-	if (t < 0) t += 1;
-	if (t > 1) t -= 1;
-	if (t < 1 / 6) return p + (q - p) * 6 * t;
-	if (t < 1 / 2) return q;
-	if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-	return p;
-};
 
 export const rgbToHsl = (r: number, g: number, b: number, a: number): HSL => {
 	r = toB10(r);
@@ -187,18 +165,6 @@ export const stringToHex = (hex: string): HEX => {
 
 	return { x, y, z, a };
 };
-
-// D65 white point references
-export const REF_X: number = 95.047;
-export const REF_Y: number = 100.0;
-export const REF_Z: number = 108.883;
-
-export const EPSILON: number = 0.008856;
-export const KAPPA: number = 903.3;
-
-export const f = (c: number): number => (c > EPSILON ? Math.pow(c, 1 / 3) : (KAPPA * c + 16) / 116);
-
-export const p = (v: number): number => (Math.pow(v, 3) > EPSILON ? Math.pow(v, 3) : (116 * v - 16) / KAPPA);
 
 export const gammaCorrection = (c: number): number => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
 
@@ -342,3 +308,87 @@ export const blenderCb = (source: RGB, ref: RGB, mode: BlendMode): RGB => {
 
 	return { r, g, b, a };
 };
+
+export const lerpRgb = (a: RGB, b: RGB, t: number): RGB => {
+	const result: RGB = { r: 0, g: 0, b: 0, a: 1 };
+	result.r = Math.round(lerp(a.r, b.r, t));
+	result.g = Math.round(lerp(a.g, b.g, t));
+	result.b = Math.round(lerp(a.b, b.b, t));
+	return result;
+};
+
+export const getCubicBezierPoints = (colors: RGB[], numPoints: number): RGB[] => {
+	const numColors: number = colors.length;
+	const points: RGB[] = [colors[0]];
+	const controlPoints: RGB[] = [];
+
+	// Calculate control points
+	for (let i: number = 1; i < numColors - 1; i++) {
+		const a: RGB = colors[i - 1];
+		const b: RGB = colors[i];
+		const c: RGB = colors[i + 1];
+
+		const ab: RGB = lerpRgb(a, b, 0.5);
+		const bc: RGB = lerpRgb(b, c, 0.5);
+
+		const p: RGB = lerpRgb(ab, bc, 0.5);
+		controlPoints.push(p);
+	}
+
+	// Generate points along curve
+	for (let i: number = 1; i < numColors; i++) {
+		const a: RGB = points[points.length - 1];
+		const b: RGB = controlPoints[i - 1];
+		const c: RGB = colors[i];
+
+		for (let j: number = 1; j <= numPoints; j++) {
+			const t: number = j / numPoints;
+			const ab: RGB = lerpRgb(a, b, t);
+			const bc: RGB = lerpRgb(b, c, t);
+			const abc: RGB = lerpRgb(ab, bc, t);
+			points.push(abc);
+		}
+	}
+
+	return points;
+}
+
+export const interpolateColor = (colors: RGB[], x: number): RGB => {
+	const numColors: number = colors.length;
+	const colorStep: number = 1 / (numColors - 1);
+	const i: number = Math.floor(x / colorStep);
+	if (i === numColors - 1) {
+		return colors[numColors - 1];
+	}
+	const dx: number = (x - i * colorStep) / colorStep;
+	const color1: RGB = colors[i];
+	const color2: RGB = colors[i + 1];
+	return {
+		r: color1.r + dx * (color2.r - color1.r),
+		g: color1.g + dx * (color2.g - color1.g),
+		b: color1.b + dx * (color2.b - color1.b),
+		a: 1
+	};
+}
+
+export const getLinearInterpolationPoints = (
+	colors: RGB[],
+	numPoints: number
+): RGB[] => {
+	const numColors: number = colors.length;
+	const points: RGB[] = [colors[0]];
+
+	for (let i: number = 1; i < numPoints; i++) {
+		const distance: number = i / (numPoints - 1);
+		const index: number = Math.floor(distance * (numColors - 1));
+		const color1: RGB = colors[index];
+		const color2: RGB = colors[index + 1];
+		const t: number = (distance - (index / (numColors - 1))) * (numColors - 1);
+		const r: number = Math.round((1 - t) * color1.r + t * color2.r);
+		const g: number = Math.round((1 - t) * color1.g + t * color2.g);
+		const b: number = Math.round((1 - t) * color1.b + t * color2.b);
+		points.push({ r, g, b, a: 1 });
+	}
+
+	return points;
+}
