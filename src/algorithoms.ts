@@ -31,6 +31,15 @@ export const toB10Alpha = (v: number): number => Number(toB10(safeRgb(v)).toFixe
 // converts 00-ff to 0-255
 export const toB16Ch = (v: string): number => parseInt(safeHex(v), 16);
 
+const hueSwitch = (p: number, q: number, t: number): number => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+};
+
 export const rgbToHsl = (r: number, g: number, b: number, a: number): HSL => {
     r = toB10(r);
     g = toB10(g);
@@ -47,7 +56,7 @@ export const rgbToHsl = (r: number, g: number, b: number, a: number): HSL => {
 
         switch (max) {
             case r:
-                h = ((g - b) / d) % 6;
+                h = ((g - b) / d) + (g < b ? 6 : 0);
                 break;
             case g:
                 h = ((b - r) / d) + 2;
@@ -57,49 +66,33 @@ export const rgbToHsl = (r: number, g: number, b: number, a: number): HSL => {
                 break;
         }
 
-        h = Math.round(h * 60);
+        h /= 6;
+        h *= 360;
 
         if (h < 0) h += 360;
     }
 
-    return {h, s: Math.round(s * 100), l: Math.round(l * 100), a};
+    return {h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100), a};
 };
 
 export const hslToRgb = (h: number, s: number, l: number, a: number): RGB => {
-    s = s / 100;
-    l = l / 100;
+    h /= 360;
+    s /= 100;
+    l /= 100;
 
-    const c: number = (1 - Math.abs(2 * l - 1)) * s, x: number = c * (1 - Math.abs((h / 60) % 2 - 1)),
-        m: number = l - c / 2;
     let r: number = 0, g: number = 0, b: number = 0;
 
-    if (0 <= h && h < 60) {
-        r = c;
-        g = x;
-        b = 0;
-    } else if (60 <= h && h < 120) {
-        r = x;
-        g = c;
-        b = 0;
-    } else if (120 <= h && h < 180) {
-        r = 0;
-        g = c;
-        b = x;
-    } else if (180 <= h && h < 240) {
-        r = 0;
-        g = x;
-        b = c;
-    } else if (240 <= h && h < 300) {
-        r = x;
-        g = 0;
-        b = c;
-    } else if (300 <= h && h < 360) {
-        r = c;
-        g = 0;
-        b = x;
+    if (s === 0) {
+        r = g = b = l;
+    } else {
+        const q: number = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p: number = 2 * l - q;
+        r = hueSwitch(p, q, h + 1 / 3);
+        g = hueSwitch(p, q, h);
+        b = hueSwitch(p, q, h - 1 / 3);
     }
 
-    return {r: toB255((r + m)), g: toB255((g + m)), b: toB255((b + m)), a};
+    return {r: toB255(r), g: toB255(g), b: toB255(b), a};
 };
 
 export const stringToRgb = (c: string, alpha: boolean): RGB => {
