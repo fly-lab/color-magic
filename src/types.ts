@@ -14,7 +14,35 @@ export interface HSL {
 	a: number;
 }
 
+export interface HSB {
+	h: number;
+	s: number;
+	b: number;
+	a: number;
+}
+
 export interface HEX {
+	x: string;
+	y: string;
+	z: string;
+	a: string;
+}
+
+export interface LAB {
+	l: string;
+	a_: string;
+	b: string;
+	a: string;
+}
+
+export interface LCH {
+	l: string;
+	c: string;
+	h: string;
+	a: string;
+}
+
+export interface XYZ {
 	x: string;
 	y: string;
 	z: string;
