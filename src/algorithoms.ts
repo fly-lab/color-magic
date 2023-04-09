@@ -232,6 +232,30 @@ export const xyzToLab = (x: number, y: number, z: number, a: number): LAB => {
 	return { l, a_, b, a };
 };
 
+export const rgbToXyz = (r: number, g: number, b: number, a: number): XYZ => {
+	const linearR: number = inverseGammaCorrection(toB10(r));
+	const linearG: number = inverseGammaCorrection(toB10(g));
+	const linearB: number = inverseGammaCorrection(toB10(b));
+
+	const x: number = 0.4124 * linearR + 0.3576 * linearG + 0.1805 * linearB;
+	const y: number = 0.2126 * linearR + 0.7152 * linearG + 0.0722 * linearB;
+	const z: number = 0.0193 * linearR + 0.1192 * linearG + 0.9505 * linearB;
+
+	return {x, y, z, a};
+}
+
+export const xyzToRgb = (x: number, y: number, z: number, a: number): RGB => {
+	let r: number = 3.2406 * x - 1.5372 * y - 0.4986 * z;
+	let g: number = -0.9689 * x + 1.8758 * y + 0.0415 * z;
+	let b: number = 0.0557 * x - 0.2040 * y + 1.0570 * z;
+
+	r = gammaCorrection(r);
+	g = gammaCorrection(g);
+	b = gammaCorrection(b);
+
+	return {r, g, b, a};
+}
+
 export const tempToR = (k: number, a: TempAlgorithm): number => {
 	const t: number = k / 100.0;
 
