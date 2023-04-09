@@ -198,7 +198,7 @@ const KAPPA: number = 903.3;
 
 const f = (c: number): number => c > EPSILON ? Math.pow(c, 1 / 3) : (KAPPA * c + 16) / 116;
 
-const p = (v: number): number => Math.pow(v, 3) > 0.008856 ? Math.pow(v, 3) : (v - 16 / 116) / 7.787;
+const p = (v: number): number => Math.pow(v, 3) > EPSILON ? Math.pow(v, 3) : (116 * v - 16) / KAPPA;
 
 export const labToXyz = (l: number, a_: number, b: number, a: number): XYZ => {
 	let y: number = (l + 16) / 116;
