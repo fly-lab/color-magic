@@ -189,25 +189,29 @@ export const stringToHex = (hex: string): HEX => {
 };
 
 // D65 white point references
-const REF_X: number = 95.047;
-const REF_Y: number = 100.0;
-const REF_Z: number = 108.883;
+export const REF_X: number = 95.047;
+export const REF_Y: number = 100.0;
+export const REF_Z: number = 108.883;
 
-const EPSILON: number = 0.008856;
-const KAPPA: number = 903.3;
+export const EPSILON: number = 0.008856;
+export const KAPPA: number = 903.3;
 
-const f = (c: number): number => c > EPSILON ? Math.pow(c, 1 / 3) : (KAPPA * c + 16) / 116;
+export const f = (c: number): number => (c > EPSILON ? Math.pow(c, 1 / 3) : (KAPPA * c + 16) / 116);
 
-const p = (v: number): number => Math.pow(v, 3) > EPSILON ? Math.pow(v, 3) : (116 * v - 16) / KAPPA;
+export const p = (v: number): number => (Math.pow(v, 3) > EPSILON ? Math.pow(v, 3) : (116 * v - 16) / KAPPA);
+
+export const gammaCorrection = (c: number): number => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
+
+export const inverseGammaCorrection = (c: number): number => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
 
 export const labToXyz = (l: number, a_: number, b: number, a: number): XYZ => {
 	let y: number = (l + 16) / 116;
 	let x: number = a_ / 500 + y;
 	let z: number = y - b / 200;
 
-    x = p(x) * REF_X;
-    y = p(y) * REF_Y;
-    z = p(z) * REF_Z;
+	x = p(x) * REF_X;
+	y = p(y) * REF_Y;
+	z = p(z) * REF_Z;
 
 	return { x, y, z, a };
 };
