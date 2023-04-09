@@ -1,4 +1,4 @@
-import { BlendMode, HEX, HSL, LAB, RGB, TempAlgorithm, XYZ } from "./types";
+import { BlendMode, HEX, HSB, HSL, LAB, RGB, TempAlgorithm, XYZ } from "./types";
 import { modeMapping, safeAlpha, safeHex, safePct, safeRgb } from "./utils";
 
 export const normal = (source: number, ref: number): number => ref + source * 0;
@@ -241,20 +241,39 @@ export const rgbToXyz = (r: number, g: number, b: number, a: number): XYZ => {
 	const y: number = 0.2126 * linearR + 0.7152 * linearG + 0.0722 * linearB;
 	const z: number = 0.0193 * linearR + 0.1192 * linearG + 0.9505 * linearB;
 
-	return {x, y, z, a};
-}
+	return { x, y, z, a };
+};
 
 export const xyzToRgb = (x: number, y: number, z: number, a: number): RGB => {
 	let r: number = 3.2406 * x - 1.5372 * y - 0.4986 * z;
 	let g: number = -0.9689 * x + 1.8758 * y + 0.0415 * z;
-	let b: number = 0.0557 * x - 0.2040 * y + 1.0570 * z;
+	let b: number = 0.0557 * x - 0.204 * y + 1.057 * z;
 
 	r = gammaCorrection(r);
 	g = gammaCorrection(g);
 	b = gammaCorrection(b);
 
-	return {r, g, b, a};
-}
+	return { r, g, b, a };
+};
+
+export const hslToHsb = (h: number, s: number, l: number, a: number): HSB => {
+	s /= 100;
+	l /= 100;
+
+	const b: number = l + s * Math.min(l, 1 - l);
+	const sv: number = b === 0 ? 0 : 2 * (1 - l / b);
+
+	return { h, s: sv * 100, b: b * 100, a };
+};
+
+export const hsbToHsl = (h: number, s: number, b: number, a: number): HSL => {
+	s /= 100;
+	b /= 100;
+
+	const l: number = ((2 - s) * b) / 2;
+	const sv: number = l === 0 || l === 1 ? 0 : (b - l) / Math.min(l, 1 - l);
+	return { h, s: sv * 100, l: l * 100, a };
+};
 
 export const tempToR = (k: number, a: TempAlgorithm): number => {
 	const t: number = k / 100.0;
