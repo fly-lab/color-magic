@@ -29,24 +29,24 @@ export interface HEX {
 }
 
 export interface LAB {
-	l: string;
-	a_: string;
-	b: string;
-	a: string;
+	l: number;
+	a_: number;
+	b: number;
+	a: number;
 }
 
 export interface LCH {
-	l: string;
-	c: string;
-	h: string;
-	a: string;
+	l: number;
+	c: number;
+	h: number;
+	a: number;
 }
 
 export interface XYZ {
-	x: string;
-	y: string;
-	z: string;
-	a: string;
+	x: number;
+	y: number;
+	z: number;
+	a: number;
 }
 
 export type NamedColor =
